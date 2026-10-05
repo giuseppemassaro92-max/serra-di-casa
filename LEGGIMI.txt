@@ -1,0 +1,32 @@
+SERRA DI CASA - come pubblicarla su GitHub Pages
+
+PUBBLICARE
+1. Su github.com crea un nuovo repository PUBBLICO, per esempio "serra-di-casa".
+2. Nel repository: "Add file" > "Upload files". Trascina i 7 file che stanno DENTRO
+   questa cartella (non la cartella): index.html, sw.js, manifest.json,
+   apple-touch-icon.png, icon-192.png, icon-512.png, LEGGIMI.txt.
+   Poi "Commit changes".
+3. Settings > Pages > Build and deployment > Source: "Deploy from a branch",
+   Branch: "main" e cartella "/ (root)" > Save.
+4. Dopo 1-2 minuti l'app e' su https://TUO-NOME-UTENTE.github.io/serra-di-casa/
+   (il link appare in cima a Settings > Pages).
+
+INSTALLARE SULL'IPHONE
+5. Apri il link con Safari > Condividi > "Aggiungi alla schermata Home" > Aggiungi.
+6. Aprila una volta con internet: da quel momento funziona anche offline.
+
+DIAGNOSI DA FOTO (gratis)
+7. Oggi > "Una pianta non sta bene?" > Foto (oppure Piante > Guide > Diagnosi da foto).
+   Scegli la pianta e scrivi cosa hai notato, poi "Copia la richiesta e apri Claude":
+   in Claude incolla il testo, allega la foto e invia. Nessun costo aggiuntivo.
+
+USARLA IN DUE
+Tua moglie installa lo stesso link. Per passarle i dati: ingranaggio in alto >
+"Invia i miei dati" (WhatsApp/AirDrop); lei sceglie "Carica dati da file".
+
+PROMEMORIA SUL TELEFONO
+Oggi > "Avvisi sul telefono": i promemoria entrano nel Calendario dell'iPhone con avviso alle 9.
+
+AGGIORNARE L'APP
+Carica i nuovi index.html e sw.js nello stesso repository (sostituiscono i vecchi).
+Chiudi e riapri l'app due volte per vedere la nuova versione. I dati restano sul telefono.

@@ -1,0 +1,21 @@
+{
+ "name": "Serra di Casa",
+ "short_name": "Serra",
+ "start_url": "./",
+ "display": "standalone",
+ "background_color": "#EDF1EA",
+ "theme_color": "#2D6A47",
+ "lang": "it",
+ "icons": [
+  {
+   "src": "icon-192.png",
+   "sizes": "192x192",
+   "type": "image/png"
+  },
+  {
+   "src": "icon-512.png",
+   "sizes": "512x512",
+   "type": "image/png"
+  }
+ ]
+}

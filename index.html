@@ -1,0 +1,1206 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Serra">
+<meta name="theme-color" content="#EDF1EA" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0E1510" media="(prefers-color-scheme: dark)">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="manifest" href="manifest.json">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}</style>
+<title>Serra di Casa</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&display=swap">
+<style>
+/* Layout: app da telefono a una colonna, intestazione fissa in alto, barra schede in basso; il terrario è disegnato in sezione su una "scena" chiara */
+:root{
+  --bg:#EDF1EA; --surface:#FBFCF9; --surface2:#E2E9DF; --fg:#17231B; --muted:#56665B; --line:#CFD9CD;
+  --accent:#2D6A47; --accent-ink:#FFFFFF; --accent-soft:#D5E7DA;
+  --lemon:#C8941A; --lemon-soft:#F6E9C4;
+  --warn:#8E5A0E; --warn-soft:#F6E6C8; --bad:#A33232; --bad-soft:#F6DAD6; --good:#2D6A47; --good-soft:#D5E7DA;
+  --scene:#E1EBE6; --scene2:#F4F8F5; --shadow:0 1px 2px rgba(23,35,27,.06),0 4px 14px rgba(23,35,27,.06);
+  --f-display:'Bricolage Grotesque','Avenir Next',system-ui,sans-serif;
+  --f-body:'Atkinson Hyperlegible',-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
+  --r:14px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0E1510; --surface:#172119; --surface2:#202C23; --fg:#E5EDE6; --muted:#9BAAA0; --line:#2B3A2F;
+  --accent:#74C493; --accent-ink:#0E1510; --accent-soft:#1E3828;
+  --lemon:#E6BE55; --lemon-soft:#3A3118;
+  --warn:#E5AE52; --warn-soft:#3A2E17; --bad:#EC8A82; --bad-soft:#3D1F1D; --good:#74C493; --good-soft:#1E3828;
+  --scene:#1B2722; --scene2:#121B16; --shadow:0 1px 2px rgba(0,0,0,.3);
+  color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#0E1510; --surface:#172119; --surface2:#202C23; --fg:#E5EDE6; --muted:#9BAAA0; --line:#2B3A2F;
+  --accent:#74C493; --accent-ink:#0E1510; --accent-soft:#1E3828;
+  --lemon:#E6BE55; --lemon-soft:#3A3118;
+  --warn:#E5AE52; --warn-soft:#3A2E17; --bad:#EC8A82; --bad-soft:#3D1F1D; --good:#74C493; --good-soft:#1E3828;
+  --scene:#1B2722; --scene2:#121B16; --shadow:0 1px 2px rgba(0,0,0,.3);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{background:var(--bg)}
+body{color:var(--fg);font-family:var(--f-body);font-size:16px;line-height:1.45;-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent}
+button,input,select,textarea{font:inherit;color:inherit}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;line-height:1.15}
+p{margin:0}
+.num{font-variant-numeric:tabular-nums}
+
+/* Struttura */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.top-in{max-width:680px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:12px}
+.brand{font-family:var(--f-display);font-weight:800;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+.top h1{font-size:24px;font-weight:800;flex:1;min-width:0}
+.iconbtn{width:40px;height:40px;border-radius:12px;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center;cursor:pointer}
+.iconbtn svg{width:20px;height:20px;stroke:var(--fg)}
+main{max-width:680px;margin:0 auto;padding-inline:16px;padding-block:14px calc(96px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:14px}
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
+.tabs-in{max-width:680px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr)}
+.tab{border:0;background:none;padding:8px 2px 9px;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11.5px;color:var(--muted);cursor:pointer}
+.tab svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.tab[aria-current="true"]{color:var(--accent);font-weight:700}
+
+/* Componenti */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.card.flat{background:transparent;border:0;padding:0}
+.card h2{font-size:19px;font-weight:700}
+.card h3{font-size:16px;font-weight:700}
+.eyebrow{font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.muted{color:var(--muted)}
+.small{font-size:14px}
+.tiny{font-size:12.5px}
+.row{display:flex;align-items:center;gap:10px;min-width:0}
+.row.wrap{flex-wrap:wrap}
+.spread{justify-content:space-between}
+.grow{flex:1;min-width:0}
+.stack{display:flex;flex-direction:column;gap:8px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:10px 14px;font-weight:700;font-size:15px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.soft{background:var(--accent-soft);border-color:transparent;color:var(--fg)}
+.btn.danger{color:var(--bad);border-color:var(--bad-soft)}
+.btn.block{width:100%}
+.btn.sm{min-height:34px;padding:6px 10px;font-size:13.5px;border-radius:10px}
+.btn:focus-visible,.chip:focus-visible,.tab:focus-visible,.iconbtn:focus-visible,.seg button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.seg{display:flex;background:var(--surface2);border-radius:12px;padding:3px;gap:2px}
+.seg button{flex:1;border:0;background:none;border-radius:9px;padding:8px 6px;font-weight:700;font-size:14px;color:var(--muted);cursor:pointer;min-height:38px}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--fg);box-shadow:var(--shadow)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 12px;font-size:14px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.chip[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.pill{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:2px 9px;font-size:12.5px;font-weight:700;white-space:nowrap}
+.pill.good{background:var(--good-soft);color:var(--good)}
+.pill.warn{background:var(--warn-soft);color:var(--warn)}
+.pill.bad{background:var(--bad-soft);color:var(--bad)}
+.pill.neutral{background:var(--surface2);color:var(--muted)}
+.pill.lemon{background:var(--lemon-soft);color:var(--warn)}
+.dot{width:12px;height:12px;border-radius:50%;flex:none;border:1px solid rgba(0,0,0,.12)}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:700;color:var(--muted);min-width:0}
+input[type=number],input[type=text],input[type=date],select,textarea{width:100%;border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:10px 11px;font-size:16px;min-height:44px;color:var(--fg);font-weight:400}
+textarea{min-height:90px;resize:vertical}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.unit{position:relative}
+.unit input{padding-right:38px}
+.unit span{position:absolute;right:11px;top:50%;transform:translateY(-50%);font-size:14px;color:var(--muted);pointer-events:none}
+.switch{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:6px 0;cursor:pointer}
+.switch input{width:46px;height:28px;appearance:none;-webkit-appearance:none;background:var(--line);border-radius:999px;position:relative;cursor:pointer;flex:none;transition:background .2s}
+.switch input::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .2s}
+.switch input:checked{background:var(--accent)}
+.switch input:checked::after{transform:translateX(18px)}
+.stepper{display:flex;align-items:center;border:1px solid var(--line);border-radius:10px;overflow:hidden;flex:none}
+.stepper button{width:38px;height:38px;border:0;background:var(--surface2);font-size:20px;font-weight:700;cursor:pointer}
+.stepper b{width:30px;text-align:center;font-variant-numeric:tabular-nums}
+.list{display:flex;flex-direction:column}
+.li{display:flex;align-items:center;gap:12px;padding:11px 0;border-top:1px solid var(--line);min-width:0}
+.li:first-child{border-top:0}
+.li .t{flex:1;min-width:0}
+.check{width:26px;height:26px;border-radius:8px;border:2px solid var(--line);background:var(--surface);flex:none;display:grid;place-items:center;cursor:pointer}
+.check[aria-checked="true"]{background:var(--accent);border-color:var(--accent)}
+.check[aria-checked="true"]::after{content:"";width:7px;height:12px;border:solid var(--accent-ink);border-width:0 2.5px 2.5px 0;transform:rotate(45deg) translate(-1px,-1px)}
+.done .t{text-decoration:line-through;color:var(--muted)}
+.steps{counter-reset:s;display:flex;flex-direction:column;gap:12px;padding:0;margin:0;list-style:none}
+.steps li{counter-increment:s;display:grid;grid-template-columns:30px 1fr;gap:10px;align-items:start}
+.steps li::before{content:counter(s);width:28px;height:28px;border-radius:50%;background:var(--accent-soft);color:var(--accent);font-weight:800;display:grid;place-items:center;font-size:14px;font-family:var(--f-display)}
+.steps li > div{min-width:0}
+.bul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:5px}
+.note{border-radius:12px;padding:10px 12px;font-size:14px;display:flex;gap:9px;align-items:flex-start}
+.note.good{background:var(--good-soft)} .note.warn{background:var(--warn-soft)} .note.bad{background:var(--bad-soft)} .note.info{background:var(--surface2)}
+.note b.ic{flex:none;width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font-size:12px;color:#fff}
+.note.good b.ic{background:var(--good);color:var(--accent-ink)} .note.warn b.ic{background:var(--warn);color:var(--surface)} .note.bad b.ic{background:var(--bad);color:var(--surface)} .note.info b.ic{background:var(--muted);color:var(--surface)}
+.scroll-x{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table.t{width:100%;border-collapse:collapse;font-size:14px}
+table.t th{text-align:left;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:6px 8px 6px 0;border-bottom:1px solid var(--line)}
+table.t td{padding:8px 8px 8px 0;border-bottom:1px solid var(--line);vertical-align:top}
+table.t td.r,table.t th.r{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+
+/* Scena del terrario */
+.scene{background:linear-gradient(180deg,var(--scene2),var(--scene));border-radius:var(--r);border:1px solid var(--line);padding:10px;display:flex;justify-content:center;overflow:hidden}
+.scene svg{max-width:100%;height:auto;display:block}
+.svl{fill:var(--fg);font-family:var(--f-body);font-size:12px;font-weight:700}
+.svm{fill:var(--muted);font-family:var(--f-body);font-size:11px}
+.svline{stroke:var(--muted);stroke-width:1;fill:none}
+.svcur{fill:var(--accent)}
+.hero-terr{display:flex;flex-direction:column;gap:10px}
+.stagebar{display:flex;align-items:center;gap:10px}
+.stagebar .grow{font-size:14px}
+.progress{height:6px;background:var(--surface2);border-radius:99px;overflow:hidden}
+.progress i{display:block;height:100%;background:var(--accent);border-radius:99px}
+.shape-pick{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.shape-pick button{border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:8px 4px 6px;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:12.5px;cursor:pointer}
+.shape-pick button[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft);font-weight:700}
+.shape-pick svg{width:34px;height:34px;stroke:var(--fg);fill:none;stroke-width:1.6}
+.plantrow{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--line)}
+.plantrow:first-child{border-top:0}
+.plantrow .pic{width:52px;height:52px;border-radius:10px;background:var(--scene);flex:none;display:grid;place-items:center;overflow:hidden}
+.plantrow .pic svg{width:52px;height:52px}
+.plantrow .t{flex:1;min-width:0}
+.plantrow .t b{display:block}
+.linkbtn{border:0;background:none;color:var(--accent);font-weight:700;padding:0;cursor:pointer;font-size:inherit}
+.thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.months{display:grid;grid-template-columns:52px repeat(12,1fr);gap:2px;font-size:11px;align-items:center}
+.months i{height:16px;border-radius:3px;background:var(--surface2)}
+.months i.s{background:var(--accent)} .months i.p{background:var(--lemon)}
+.months span.h{text-align:center;color:var(--muted)}
+.months span.h.cur{color:var(--fg);font-weight:800}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.cal .d{aspect-ratio:1;max-width:100%;border-radius:10px;border:1px solid transparent;background:var(--surface);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;font-variant-numeric:tabular-nums;font-size:14px;padding:0}
+.cal .d.out{opacity:.35}
+.cal .d.today{border-color:var(--accent);font-weight:800}
+.cal .d.sel{background:var(--accent);color:var(--accent-ink)}
+.cal .d i{width:6px;height:6px;border-radius:50%;background:var(--lemon)}
+.cal .d.sel i{background:var(--accent-ink)}
+.cal .wd{text-align:center;font-size:11px;color:var(--muted);font-weight:700}
+.diary img{width:100%;border-radius:10px;display:block;max-height:340px;object-fit:cover}
+.big-num{font-family:var(--f-display);font-size:28px;font-weight:800;font-variant-numeric:tabular-nums}
+
+/* Foglio modale */
+.overlay{position:fixed;inset:0;background:rgba(10,18,12,.45);z-index:50;display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:var(--bg);width:100%;max-width:680px;max-height:92%;border-radius:20px 20px 0 0;display:flex;flex-direction:column;overflow:hidden}
+.sheet.anim{animation:up .22s ease-out}
+a.btn{text-decoration:none}
+.sheet-h{display:flex;align-items:center;gap:10px;padding:14px 16px 10px;border-bottom:1px solid var(--line);background:var(--surface)}
+.sheet-h h2{font-size:20px;flex:1;min-width:0}
+.sheet-b{overflow-y:auto;padding:14px 16px calc(24px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:14px;-webkit-overflow-scrolling:touch}
+@keyframes up{from{transform:translateY(30px);opacity:.4}to{transform:none;opacity:1}}
+.toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:14px;font-weight:700;z-index:60;max-width:calc(100% - 32px);text-align:center}
+@media (prefers-reduced-motion: reduce){.sheet{animation:none}*{transition:none!important}}
+@media (min-width:560px){.grid-wide2{display:grid;grid-template-columns:1fr 1fr;gap:14px}}
+</style>
+</head><body>
+
+
+<header class="top"><div class="top-in">
+  <div class="grow"><div class="brand">Serra di Casa</div><h1 id="title">Oggi</h1></div>
+  <button class="iconbtn" data-a="settings" aria-label="Impostazioni e backup"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
+</div></header>
+<main id="main"></main>
+<nav class="tabs"><div class="tabs-in" id="tabs"></div></nav>
+<div id="overlay" class="overlay" hidden></div>
+<div id="toast" class="toast" hidden></div>
+
+<script>
+'use strict';
+/* =================== DATI =================== */
+const MESI=['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'];
+const MESI3=['gen','feb','mar','apr','mag','giu','lug','ago','set','ott','nov','dic'];
+const GIORNI=['domenica','lunedì','martedì','mercoledì','giovedì','venerdì','sabato'];
+const GG3=['dom','lun','mar','mer','gio','ven','sab'];
+
+const STAGIONE=[
+ 'Gennaio: poche semine. Copri le insalate con tessuto non tessuto nelle notti sotto i 3 °C e pota le aromatiche secche.',
+ 'Febbraio: ripartono ravanelli, rucola e piselli. In semenzaio, al riparo, si seminano pomodori e peperoni.',
+ 'Marzo: il mese più ricco. Insalate, carote, bietole; a fine mese le prime piantine di pomodoro.',
+ 'Aprile: si trapiantano pomodori, peperoni, melanzane e basilico. Si seminano zucchine e fagiolini.',
+ 'Maggio: annaffia più spesso e copri la terra dei vasi con paglia. Si raccolgono fave e piselli.',
+ 'Giugno: annaffia al mattino presto, ogni 1–2 giorni. Le insalate vogliono mezz’ombra.',
+ 'Luglio: il caldo ferma le insalate. In semenzaio si preparano cavoli e broccoli per l’autunno.',
+ 'Agosto: annaffia ogni giorno. A fine mese prepara i vasi e semina finocchi e carote.',
+ 'Settembre: si riparte. Trapianta cavoli, broccoli e finocchi; semina rucola, ravanelli e spinaci.',
+ 'Ottobre: il mese migliore per l’orto invernale ad Alcamo. Insalate, cavolo nero, fave, piselli, aglio.',
+ 'Novembre: ultime fave, piselli e aglio. Riduci l’acqua e controlla le lumache dopo la pioggia.',
+ 'Dicembre: si raccolgono cavoli e insalate. Proteggi le piante nelle notti più fredde.'
+];
+
+/* sp = distanza tra le piante in vaso (cm), minH = profondità minima del vaso (cm) */
+const CROPS=[
+ {id:'lattuga',name:'Lattuga',latin:'Lactuca sativa',cat:'ortaggio',color:'#86C75E',seme:{m:[2,3,4,8,9,10,11],d:0.5,g:[5,10]},piantina:{m:[2,3,4,9,10,11]},rec:'piantina',sp:20,minH:15,sun:'Sole o mezz’ombra',water:'Regolare: terra sempre appena umida',hv:{seme:60,piantina:40},how:'Taglia le foglie esterne a 3 cm da terra: ricresce per 2–3 tagli. Oppure raccogli il cespo intero alla base.',plantNote:'Lascia il colletto fuori terra: se lo interri, marcisce.',tips:['Alterna una varietà da taglio (gentilina) e una a cespo (romana).','Con un caldo improvviso sale a fiore e diventa amara: raccoglila subito.'],probs:['Lumache dopo la pioggia: controlla la sera','Afidi sotto le foglie','Marciume al colletto se interrata troppo'],friends:['ravanello','carota','fragola','cavolonero'],avoid:['prezzemolo'],price:{seme:[1.5,2.5],piantina:[0.4,0.6]}},
+ {id:'rucola',name:'Rucola',latin:'Eruca sativa',cat:'ortaggio',color:'#4FA34A',seme:{m:[2,3,4,5,8,9,10,11],d:0.5,g:[4,7],spaglio:true},rec:'seme',sp:5,minH:15,sun:'Sole o mezz’ombra',water:'Regolare',hv:{seme:35},how:'Taglia le foglie a 3–4 cm da terra quando sono lunghe 10 cm: ricresce più volte.',tips:['Semina poca rucola ogni 2–3 settimane per averne sempre.','Col caldo va a seme in fretta: d’estate mettila in mezz’ombra.'],probs:['Altica: piccoli fori sulle foglie, tieni la terra umida','Fioritura precoce col caldo'],friends:['lattuga','spinacio'],avoid:[],price:{seme:[1.5,2.5]}},
+ {id:'ravanello',name:'Ravanello',latin:'Raphanus sativus',cat:'ortaggio',color:'#D9415E',seme:{m:[2,3,4,5,9,10,11],d:1,g:[3,6]},rec:'seme',sp:5,minH:15,sun:'Pieno sole',water:'Regolare e costante',hv:{seme:30},how:'Estrai quando la radice è grande come una ciliegia. Se aspetti troppo diventa legnosa e piccante.',tips:['È il più veloce dell’orto: ideale per iniziare.','Semina a scalare ogni 2 settimane.','Varietà consigliate: Saxa, Candela di ghiaccio.'],probs:['Tutto foglie e niente radice: troppo vicini o troppa ombra','Radici spaccate: annaffiature irregolari'],friends:['lattuga','carota','spinacio'],avoid:[],price:{seme:[1.5,2.5]}},
+ {id:'spinacio',name:'Spinacio',latin:'Spinacia oleracea',cat:'ortaggio',color:'#2F7D3B',seme:{m:[2,3,9,10,11],d:1.5,g:[7,14]},rec:'seme',sp:10,minH:20,sun:'Sole o mezz’ombra',water:'Regolare',hv:{seme:50},how:'Raccogli le foglie esterne man mano e lascia il cuore a crescere.',tips:['Ama il fresco: ad Alcamo rende da ottobre a marzo.','Metti i semi in ammollo una notte: germinano prima.'],probs:['Peronospora con troppa umidità: annaffia alla base','Sale a seme con le giornate lunghe'],friends:['ravanello','fave','lattuga'],avoid:[],price:{seme:[1.5,2.5]}},
+ {id:'bietola',name:'Bietola da taglio',latin:'Beta vulgaris',cat:'ortaggio',color:'#5E9E3C',seme:{m:[3,4,5,9,10],d:2,g:[7,14]},piantina:{m:[3,4,5,9,10,11]},rec:'piantina',sp:20,minH:25,sun:'Sole o mezz’ombra',water:'Regolare',hv:{seme:60,piantina:40},how:'Taglia le foglie esterne a 3 cm dalla base: ne produce per mesi.',tips:['Ogni “seme” è un glomerulo con più semi: dirada a una pianta.'],probs:['Cercospora: macchie tonde marroni, togli le foglie colpite'],friends:['lattuga','cipollotto'],avoid:[],price:{seme:[1.5,2.5],piantina:[0.4,0.6]}},
+ {id:'cavolonero',name:'Cavolo nero',latin:'Brassica oleracea var. palmifolia',cat:'ortaggio',color:'#2E4B3A',seme:{m:[6,7,8],d:1,g:[5,10],semenzaio:true},piantina:{m:[9,10,11]},rec:'piantina',sp:35,minH:30,sun:'Pieno sole',water:'Regolare',hv:{seme:110,piantina:75},how:'Stacca le foglie basse e lascia crescere il ciuffo centrale. Dopo il primo freddo è più dolce.',tips:['Una pianta per vaso da 35–40 cm: diventa alta 60–80 cm.'],probs:['Cavolaia: bruchi verdi sotto le foglie, toglili a mano','Afidi grigi: acqua e sapone di Marsiglia'],friends:['fave','aglio','lattuga','spinacio'],avoid:['fragola','pomodoro'],price:{seme:[1.5,2.5],piantina:[0.5,0.8]}},
+ {id:'broccolo',name:'Broccolo',latin:'Brassica oleracea var. italica',cat:'ortaggio',color:'#3E7A4E',seme:{m:[6,7,8],d:1,g:[5,10],semenzaio:true},piantina:{m:[8,9,10]},rec:'piantina',sp:40,minH:30,sun:'Pieno sole',water:'Regolare',hv:{seme:130,piantina:90},how:'Taglia la testa centrale quando è compatta, prima che i boccioli si aprano. Poi la pianta fa getti laterali.',tips:['Il broccoletto siciliano (sparacello) si raccoglie a getti per tutto l’inverno.'],probs:['Cavolaia e afidi, come il cavolo nero'],friends:['aglio','lattuga','spinacio'],avoid:['fragola','pomodoro'],price:{seme:[1.5,2.5],piantina:[0.5,0.8]}},
+ {id:'finocchio',name:'Finocchio',latin:'Foeniculum vulgare',cat:'ortaggio',color:'#B6D27A',seme:{m:[7,8],d:1,g:[10,15],semenzaio:true},piantina:{m:[8,9,10]},rec:'piantina',sp:20,minH:25,sun:'Pieno sole',water:'Costante: se secca, il grumolo si spacca',hv:{seme:110,piantina:80},how:'Raccogli quando il grumolo è grande come un pugno, tagliando alla base.',tips:['Rincalzalo con terra 2 settimane prima della raccolta: resta bianco e tenero.'],probs:['Salita a seme con sbalzi di temperatura'],friends:['lattuga'],avoid:['pomodoro','fagiolino'],price:{seme:[1.5,2.5],piantina:[0.4,0.6]}},
+ {id:'fave',name:'Fave',latin:'Vicia faba',cat:'ortaggio',color:'#7AA34F',seme:{m:[10,11,12],d:4,g:[10,15]},rec:'seme',sp:12,minH:30,sun:'Pieno sole',water:'Moderata',hv:{seme:150},support:true,how:'Raccogli i baccelli gonfi ma ancora verde brillante (marzo–aprile).',tips:['Tieni i semi in ammollo 12 ore prima di seminarli.','Quando fiorisce in basso, spunta la cima: blocca gli afidi.'],probs:['Afidi neri sulle cime','Orobanche, una pianta parassita: estirpala subito'],friends:['spinacio','cavolonero','lattuga'],avoid:['aglio','cipollotto'],price:{seme:[2,3]}},
+ {id:'piselli',name:'Piselli',latin:'Pisum sativum',cat:'ortaggio',color:'#9CCB5E',seme:{m:[10,11,12,2],d:3,g:[7,14]},rec:'seme',sp:6,minH:25,sun:'Pieno sole',water:'Moderata',hv:{seme:110},support:true,how:'Raccogli i baccelli quando i piselli dentro sono formati ma ancora teneri.',tips:['Scegli varietà nane (es. Progress) per i vasi: bastano canne da 60–80 cm.'],probs:['Oidio: polvere bianca sulle foglie in primavera'],friends:['carota','ravanello','lattuga'],avoid:['aglio','cipollotto'],price:{seme:[2,3]}},
+ {id:'aglio',name:'Aglio',latin:'Allium sativum',cat:'ortaggio',color:'#E8E1CF',bulbo:{m:[10,11,12],d:3},rec:'bulbo',sp:10,minH:20,sun:'Pieno sole',water:'Poca, mai ristagni',hv:{bulbo:210},how:'Quando due terzi delle foglie ingialliscono (maggio–giugno), estrai le teste e falle asciugare all’ombra 2 settimane.',tips:['Usa aglio da semina: quello da cucina è spesso trattato contro la germogliazione.','Ogni testa dà 8–12 spicchi da piantare.'],probs:['Ruggine: macchie arancioni, togli le foglie colpite','Marciume con troppa acqua'],friends:['cavolonero','broccolo','fragola','lattuga','pomodoro'],avoid:['fave','piselli','fagiolino'],price:{bulbo:[2,3]}},
+ {id:'cipollotto',name:'Cipollotto',latin:'Allium cepa',cat:'ortaggio',color:'#D7E3B0',seme:{m:[8,9],d:1,g:[10,15]},piantina:{m:[9,10,11,2,3]},rec:'piantina',sp:8,minH:20,sun:'Pieno sole',water:'Moderata',hv:{seme:100,piantina:60},how:'Estrai quando il fusto è spesso come un dito.',tips:['Le piantine si vendono a mazzetti da 20–30.'],probs:['Mosca della cipolla in primavera'],friends:['lattuga','carota','bietola'],avoid:['fave','piselli','fagiolino'],price:{seme:[1.5,2.5],piantina:[2,3]}},
+ {id:'carota',name:'Carota',latin:'Daucus carota',cat:'ortaggio',color:'#E8862D',seme:{m:[2,3,4,8,9,10],d:0.5,g:[10,20]},rec:'seme',sp:5,minH:30,sun:'Pieno sole',water:'Regolare finché germinano, poi moderata',hv:{seme:90},how:'Estrai quando vedi il colletto arancione largo 2 cm. Bagna la terra prima.',tips:['Nei vasi scegli varietà corte: Parigina o Chantenay.','I semi sono minuscoli: mescolali con sabbia.'],probs:['Germinazione lenta e irregolare: non far mai seccare la superficie'],friends:['lattuga','ravanello','piselli','cipollotto'],avoid:[],price:{seme:[1.5,2.5]}},
+ {id:'valerianella',name:'Valerianella (songino)',latin:'Valerianella locusta',cat:'ortaggio',color:'#3F8F46',seme:{m:[9,10,11],d:0.5,g:[7,14]},rec:'seme',sp:8,minH:15,sun:'Sole o mezz’ombra',water:'Regolare',hv:{seme:55},how:'Taglia le rosette intere alla base.',tips:['È l’insalata più resistente al freddo.'],probs:['Lumache'],friends:['lattuga','ravanello'],avoid:[],price:{seme:[1.5,2.5]}},
+ {id:'fragola',name:'Fragola',latin:'Fragaria × ananassa',cat:'ortaggio',color:'#D63A4A',piantina:{m:[9,10,11,2,3]},rec:'piantina',sp:25,minH:20,sun:'Pieno sole',water:'Regolare, alla base',hv:{piantina:180},how:'Raccogli i frutti rossi del tutto, al mattino, con un pezzetto di picciolo.',plantNote:'La corona deve restare a livello della terra: né sotto né sopra.',tips:['Le varietà rifiorenti producono da aprile a ottobre.','Metti paglia sotto i frutti perché non tocchino la terra.'],probs:['Muffa grigia sui frutti con umidità','Lumache'],friends:['lattuga','aglio','spinacio'],avoid:['cavolonero','broccolo'],price:{piantina:[0.8,1.5]}},
+ {id:'pomodoro',name:'Pomodoro ciliegino',latin:'Solanum lycopersicum',cat:'ortaggio',color:'#E24B33',seme:{m:[2,3],d:0.5,g:[6,10],semenzaio:true},piantina:{m:[3,4,5]},rec:'piantina',sp:45,minH:35,sun:'Pieno sole',water:'Regolare, alla base, mai sulle foglie',hv:{seme:120,piantina:75},support:true,how:'Raccogli i grappoli quando i frutti sono rossi e lucidi.',plantNote:'Interralo 5–8 cm più profondo: emette radici dal fusto e diventa più robusto.',tips:['Togli i germogli ascellari (le “femminelle”) ogni settimana.','Un vaso da almeno 30 litri per pianta.'],probs:['Peronospora con umidità: macchie scure','Marciume apicale: annaffiature irregolari'],friends:['basilico','aglio','lattuga'],avoid:['finocchio','cavolonero','broccolo'],price:{seme:[1.5,2.5],piantina:[0.6,1]}},
+ {id:'peperone',name:'Peperone',latin:'Capsicum annuum',cat:'ortaggio',color:'#D93A2B',seme:{m:[2,3],d:0.5,g:[8,14],semenzaio:true},piantina:{m:[4,5]},rec:'piantina',sp:35,minH:30,sun:'Pieno sole',water:'Regolare',hv:{seme:140,piantina:80},support:true,how:'Raccogli verdi o lasciali colorare sulla pianta.',tips:['Un tutore corto evita che i rami si spezzino col peso.'],probs:['Afidi','Marciume apicale'],friends:['basilico','cipollotto'],avoid:['finocchio'],price:{seme:[1.5,2.5],piantina:[0.6,1]}},
+ {id:'melanzana',name:'Melanzana',latin:'Solanum melongena',cat:'ortaggio',color:'#5B2D5C',seme:{m:[2,3],d:0.5,g:[8,14],semenzaio:true},piantina:{m:[4,5]},rec:'piantina',sp:45,minH:35,sun:'Pieno sole',water:'Abbondante d’estate',hv:{seme:140,piantina:75},support:true,how:'Raccogli quando la buccia è lucida: se diventa opaca è troppo matura.',tips:['Vaso da almeno 25–30 litri per pianta.'],probs:['Dorifora e ragnetto rosso col secco'],friends:['basilico','fagiolino'],avoid:['finocchio'],price:{seme:[1.5,2.5],piantina:[0.6,1]}},
+ {id:'zucchina',name:'Zucchina',latin:'Cucurbita pepo',cat:'ortaggio',color:'#3C7A2E',seme:{m:[4,5,6],d:3,g:[5,8]},piantina:{m:[4,5,6]},rec:'seme',sp:70,minH:40,sun:'Pieno sole',water:'Abbondante, alla base',hv:{seme:55,piantina:45},how:'Raccogli le zucchine lunghe 15–20 cm, ogni 2–3 giorni.',tips:['Una pianta per vaso da almeno 40 litri.','I fiori maschili si mangiano fritti.'],probs:['Oidio: polvere bianca, annaffia solo alla base'],friends:['fagiolino','lattuga'],avoid:[],price:{seme:[1.5,2.5],piantina:[0.6,1]}},
+ {id:'fagiolino',name:'Fagiolino nano',latin:'Phaseolus vulgaris',cat:'ortaggio',color:'#6FA640',seme:{m:[4,5,6,7],d:3,g:[6,10]},rec:'seme',sp:12,minH:25,sun:'Pieno sole',water:'Regolare',hv:{seme:60},how:'Raccogli i baccelli quando sono lisci e si spezzano con un clic.',tips:['Raccogli spesso: la pianta continua a produrre.'],probs:['Afidi neri','Ragnetto rosso col caldo secco'],friends:['zucchina','melanzana','carota'],avoid:['aglio','cipollotto','finocchio'],price:{seme:[1.5,2.5]}},
+ {id:'peperoncino',name:'Peperoncino',latin:'Capsicum annuum',cat:'ortaggio',color:'#C8102E',seme:{m:[2,3],d:0.5,g:[10,20],semenzaio:true},piantina:{m:[4,5]},rec:'piantina',sp:30,minH:25,sun:'Pieno sole',water:'Moderata',hv:{seme:150,piantina:90},how:'Raccogli quando i frutti sono rossi e lucidi.',tips:['In vaso può passare l’inverno al riparo e ripartire in primavera.'],probs:['Afidi'],friends:['basilico'],avoid:['finocchio'],price:{seme:[1.5,2.5],piantina:[0.8,1.5]}},
+ {id:'cavolfiore',name:'Cavolfiore',latin:'Brassica oleracea var. botrytis',cat:'ortaggio',color:'#EDE6C8',seme:{m:[6,7],d:1,g:[5,10],semenzaio:true},piantina:{m:[8,9,10]},rec:'piantina',sp:45,minH:30,sun:'Pieno sole',water:'Regolare',hv:{seme:140,piantina:100},how:'Taglia la testa quando è compatta e bianca, con qualche foglia attorno.',tips:['Quando la testa è grande come un uovo, legaci sopra le foglie esterne: resta bianca.'],probs:['Cavolaia e afidi'],friends:['aglio','lattuga','spinacio'],avoid:['fragola','pomodoro'],price:{seme:[1.5,2.5],piantina:[0.5,0.8]}},
+ {id:'cicoria',name:'Cicoria (catalogna)',latin:'Cichorium intybus',cat:'ortaggio',color:'#5C9B46',seme:{m:[7,8,9],d:0.5,g:[6,12]},piantina:{m:[9,10,11,3,4]},rec:'piantina',sp:25,minH:20,sun:'Pieno sole',water:'Regolare',hv:{seme:90,piantina:60},how:'Taglia le foglie esterne o il cespo intero; ricaccia.',tips:['Resiste bene al freddo dell’inverno siciliano.'],probs:['Lumache'],friends:['lattuga','finocchio'],avoid:[],price:{seme:[1.5,2.5],piantina:[0.4,0.6]}},
+ {id:'sedano',name:'Sedano',latin:'Apium graveolens',cat:'ortaggio',color:'#9CC66B',seme:{m:[2,3],d:0.3,g:[15,25],semenzaio:true},piantina:{m:[4,5,8,9]},rec:'piantina',sp:25,minH:25,sun:'Sole o mezz’ombra',water:'Abbondante e costante',hv:{seme:150,piantina:90},how:'Taglia le coste esterne man mano, o la pianta intera alla base.',tips:['Ama la terra sempre umida: non farlo mai seccare.'],probs:['Septoria: macchie scure sulle foglie'],friends:['pomodoro','cavolonero'],avoid:[],price:{seme:[1.5,2.5],piantina:[0.4,0.6]}},
+ {id:'cetriolo',name:'Cetriolo',latin:'Cucumis sativus',cat:'ortaggio',color:'#2F7D32',seme:{m:[4,5,6],d:2,g:[5,8]},piantina:{m:[4,5,6]},rec:'piantina',sp:40,minH:30,sun:'Pieno sole',water:'Abbondante, alla base',hv:{seme:65,piantina:50},support:true,how:'Raccogli i cetrioli verdi e sodi, lunghi 15–20 cm.',tips:['Fallo arrampicare su una rete o una canna: occupa meno spazio.'],probs:['Oidio con l’umidità'],friends:['lattuga','fagiolino'],avoid:['basilico'],price:{seme:[1.5,2.5],piantina:[0.6,1]}},
+ {id:'basilico',name:'Basilico',latin:'Ocimum basilicum',cat:'aromatica',color:'#3FA34D',seme:{m:[3,4,5,6],d:0.5,g:[5,10]},piantina:{m:[4,5,6,7]},rec:'piantina',sp:20,minH:15,sun:'Pieno sole',water:'Regolare, mai sulle foglie',hv:{seme:50,piantina:20},how:'Cima sempre sopra una coppia di foglie e togli i fiori appena spuntano.',tips:['Soffre sotto i 10 °C: da novembre a marzo solo in casa.'],probs:['Peronospora: macchie scure sotto le foglie'],friends:['pomodoro','peperone','peperoncino'],avoid:[],price:{seme:[1.5,2.5],piantina:[1.5,2.5]}},
+ {id:'prezzemolo',name:'Prezzemolo',latin:'Petroselinum crispum',cat:'aromatica',color:'#2E8B3E',seme:{m:[2,3,4,9,10],d:0.5,g:[15,25]},piantina:{m:[2,3,4,5,9,10,11]},rec:'piantina',sp:15,minH:20,sun:'Sole o mezz’ombra',water:'Regolare',hv:{seme:70,piantina:30},how:'Taglia gli steli esterni alla base.',tips:['Il seme germina lentamente: tienilo in ammollo una notte.'],probs:['Ingiallisce col troppo caldo'],friends:['pomodoro'],avoid:['lattuga'],price:{seme:[1.5,2.5],piantina:[1.5,2.5]}},
+ {id:'rosmarino',name:'Rosmarino',latin:'Salvia rosmarinus',cat:'aromatica',perenne:true,color:'#5C7F6A',piantina:{m:[2,3,4,5,9,10,11]},rec:'piantina',sp:35,minH:20,sun:'Pieno sole',water:'Poca: lascia asciugare la terra',hv:{piantina:30},how:'Taglia rametti di 10 cm, mai più di un terzo della pianta.',tips:['Terra con un terzo di sabbia o lapillo.','Dura molti anni: dopo 1–2 anni dagli un vaso suo.'],probs:['Marciume radicale con troppa acqua'],friends:['salvia','timo'],avoid:[],price:{piantina:[2.5,3.5]},mix:true},
+ {id:'salvia',name:'Salvia',latin:'Salvia officinalis',cat:'aromatica',perenne:true,color:'#8FA79A',piantina:{m:[2,3,4,5,9,10,11]},rec:'piantina',sp:30,minH:20,sun:'Pieno sole',water:'Poca',hv:{piantina:30},how:'Raccogli le foglie singole o le cime.',tips:['Pota a fine inverno per tenerla compatta.'],probs:['Oidio con troppa umidità'],friends:['rosmarino','timo'],avoid:[],price:{piantina:[2.5,3.5]},mix:true},
+ {id:'timo',name:'Timo',latin:'Thymus vulgaris',cat:'aromatica',perenne:true,color:'#7E9A6A',piantina:{m:[2,3,4,5,9,10,11]},rec:'piantina',sp:20,minH:15,sun:'Pieno sole',water:'Pochissima',hv:{piantina:30},how:'Taglia le cime prima della fioritura, quando sono più profumate.',tips:['Ama il terreno povero e sassoso.'],probs:['Marciume con ristagni'],friends:['rosmarino','salvia'],avoid:[],price:{piantina:[2.5,3.5]},mix:true},
+ {id:'origano',name:'Origano',latin:'Origanum vulgare',cat:'aromatica',perenne:true,color:'#6E9B55',piantina:{m:[2,3,4,5,9,10,11]},rec:'piantina',sp:25,minH:15,sun:'Pieno sole',water:'Poca',hv:{piantina:40},how:'Taglia gli steli in fioritura e falli seccare a testa in giù all’ombra.',tips:['L’origano siciliano è più aromatico se cresce al sole e senza concime.'],probs:['Marciume con ristagni'],friends:['rosmarino','timo'],avoid:[],price:{piantina:[2.5,3.5]},mix:true},
+ {id:'menta',name:'Menta',latin:'Mentha spicata',cat:'aromatica',perenne:true,color:'#4CB36A',piantina:{m:[2,3,4,5,9,10,11]},rec:'piantina',sp:30,minH:20,sun:'Mezz’ombra',water:'Abbondante',hv:{piantina:30},how:'Taglia le cime: più la tagli, più si infittisce.',tips:['È invasiva: mettila sempre in un vaso tutto suo.'],probs:['Ruggine: macchie arancioni sotto le foglie'],friends:[],avoid:['rosmarino','salvia','timo','origano'],price:{piantina:[2.5,3.5]},alone:true},
+ {id:'erbacipollina',name:'Erba cipollina',latin:'Allium schoenoprasum',cat:'aromatica',perenne:true,color:'#5DA35A',seme:{m:[3,4,9],d:0.5,g:[10,14]},piantina:{m:[2,3,4,5,9,10]},rec:'piantina',sp:15,minH:15,sun:'Sole o mezz’ombra',water:'Regolare',hv:{seme:70,piantina:20},how:'Taglia gli steli a 3 cm da terra con le forbici.',tips:['I fiori viola sono commestibili.'],probs:['Afidi'],friends:['carota','fragola'],avoid:['fave','piselli','fagiolino'],price:{seme:[1.5,2.5],piantina:[2,3]}}
+];
+CROPS.forEach(c=>{['tips','probs','friends','avoid'].forEach(k=>c[k]=c[k]||[]);c.how=c.how||'Raccogli quando è pronta.';c.sun=c.sun||'Pieno sole';c.water=c.water||'Regolare'});
+const CROP=Object.fromEntries(CROPS.map(c=>[c.id,c]));
+
+/* Piante per terrario. env: chiuso = umidità alta, aperto = piante grasse, entrambi */
+const TPLANTS=[
+ {id:'fittonia',name:'Fittonia bianca',latin:'Fittonia albivenis',env:'chiuso',h:12,w:12,light:'Luce indiretta media',hum:'Alta',price:[3,4],draw:'fittonia',color:'#2F7A45',vein:'#EEF3EC',desc:'Foglie verdi con venature bianche. È la pianta simbolo del terrario chiuso: se ha sete si affloscia e si riprende in poche ore.',care:'Pota le punte quando tocca il vetro: si infittisce.'},
+ {id:'fittonia-rosa',name:'Fittonia rosa',latin:'Fittonia albivenis',env:'chiuso',h:12,w:12,light:'Luce indiretta media',hum:'Alta',price:[3,4],draw:'fittonia',color:'#3B6B44',vein:'#F08DB0',desc:'Come la bianca, con nervature rosa acceso. Insieme alla bianca crea un bel contrasto.',care:'Pota le punte quando tocca il vetro.'},
+ {id:'felce',name:'Felce nana',latin:'Pteris cretica',env:'chiuso',h:20,w:18,light:'Luce indiretta',hum:'Alta',price:[3,5],draw:'felce',color:'#4C8C3C',desc:'Fronde leggere e arcuate: dà altezza e un aspetto da sottobosco. Va al centro o sul fondo.',care:'Togli le fronde secche alla base. Non deve mai asciugarsi del tutto.'},
+ {id:'asplenium',name:'Asplenium mini',latin:'Asplenium nidus',env:'chiuso',h:18,w:14,light:'Luce indiretta',hum:'Alta',price:[4,6],draw:'asplenium',color:'#78B23F',desc:'Felce a nido con foglie intere, lucide e ondulate. Molto scenografica.',care:'Non bagnare il centro della rosetta.'},
+ {id:'selaginella',name:'Selaginella',latin:'Selaginella kraussiana',env:'chiuso',h:8,w:10,light:'Luce indiretta tenue',hum:'Molto alta',price:[3,4],draw:'selaginella',color:'#62A945',desc:'Cuscino morbido e piumoso verde brillante. Perfetta per riempire gli spazi bassi.',care:'Ama l’umidità costante: nel terrario chiuso è a casa sua.'},
+ {id:'pilea',name:'Pilea glauca',latin:'Pilea glauca',env:'chiuso',h:6,w:12,light:'Luce indiretta',hum:'Alta',price:[3,4],draw:'pilea',color:'#A3BCB6',desc:'Foglioline argentate su steli rossicci che ricadono. Va vicino al vetro, davanti.',care:'Accorcia gli steli che diventano troppo lunghi.'},
+ {id:'hypoestes',name:'Ipoestes',latin:'Hypoestes phyllostachya',env:'chiuso',h:15,w:12,light:'Luce indiretta intensa',hum:'Alta',price:[2.5,3.5],draw:'hypoestes',color:'#3E7B4B',spot:'#F08FB7',desc:'Foglie a pois rosa. Cresce in fretta: va cimata spesso.',care:'Cima le punte ogni mese per tenerla bassa.'},
+ {id:'peperomia',name:'Peperomia',latin:'Peperomia caperata',env:'entrambi',h:12,w:12,light:'Luce indiretta',hum:'Media',price:[3,5],draw:'peperomia',color:'#2E5B3A',desc:'Foglie tonde, carnose e increspate. Sta bene sia nel terrario chiuso sia in quello aperto.',care:'Teme i ristagni: nel chiuso annaffia ancora meno.'},
+ {id:'cryptanthus',name:'Cryptanthus',latin:'Cryptanthus bivittatus',env:'entrambi',h:6,w:12,light:'Luce intensa indiretta',hum:'Media',price:[3,5],draw:'cryptanthus',color:'#B9697B',desc:'Rosetta a stella, piatta, rosa e verde a strisce. Perfetta in primo piano.',care:'Cresce lentissima: quasi nessuna potatura.'},
+ {id:'ficus',name:'Ficus pumila',latin:'Ficus pumila',env:'chiuso',h:15,w:8,light:'Luce indiretta',hum:'Alta',price:[3,4],draw:'ficus',color:'#3F8A3A',desc:'Rampicante a foglie piccole: si arrampica sul legno o lungo il vetro.',care:'Accorcia i tralci che coprono troppo il vetro.'},
+ {id:'soleirolia',name:'Lacrime di bambino',latin:'Soleirolia soleirolii',env:'chiuso',h:3,w:10,light:'Luce indiretta',hum:'Alta',price:[2.5,3.5],draw:'soleirolia',color:'#8CC152',desc:'Tappeto di foglioline minuscole. Alternativa al muschio per coprire la terra.',care:'Se invade tutto, strappane un ciuffo.'},
+ {id:'muschio-cuscino',name:'Muschio a cuscino',latin:'Leucobryum glaucum',env:'chiuso',h:4,w:8,light:'Luce indiretta tenue',hum:'Alta',price:[3,5],draw:'cuscino',color:'#8DB36A',desc:'Cupolette compatte verde-argento: fanno da “colline” in miniatura.',care:'Spruzza se diventa biancastro.'},
+ {id:'echeveria',name:'Echeveria',latin:'Echeveria elegans',env:'aperto',h:8,w:10,light:'Sole o luce molto intensa',hum:'Bassa',price:[2,3.5],draw:'echeveria',color:'#A6CABE',desc:'Rosetta a petali carnosi azzurro-verde. La più classica tra le piante grasse da terrario.',care:'Acqua solo quando il substrato è asciutto del tutto, mai sulle foglie.'},
+ {id:'haworthia',name:'Haworthia',latin:'Haworthiopsis attenuata',env:'aperto',h:10,w:8,light:'Luce intensa, anche indiretta',hum:'Bassa',price:[2.5,4],draw:'haworthia',color:'#3D6B4A',desc:'Foglie appuntite verde scuro a strisce bianche. Tollera meno luce delle altre grasse.',care:'Acqua ogni 2–3 settimane d’estate, una volta al mese d’inverno.'},
+ {id:'crassula',name:'Crassula',latin:'Crassula ovata',env:'aperto',h:14,w:10,light:'Sole o luce intensa',hum:'Bassa',price:[2.5,4],draw:'crassula',color:'#5E8F4A',desc:'Albero di giada in miniatura: tronchetto e foglie carnose. Dà altezza al terrario aperto.',care:'Pota i rami troppo lunghi: le talee radicano facilmente.'},
+ {id:'sedum',name:'Sedum',latin:'Sedum makinoi',env:'aperto',h:6,w:10,light:'Sole',hum:'Bassa',price:[2,3],draw:'sedum',color:'#B2CF6E',desc:'Piccole rosette verde lime che si allargano a tappeto.',care:'Quasi nessuna: acqua rara.'},
+ {id:'cactus',name:'Cactus Mammillaria',latin:'Mammillaria sp.',env:'aperto',h:9,w:7,light:'Sole',hum:'Bassa',price:[2,3.5],draw:'cactus',color:'#5A8C55',desc:'Piccolo cactus globoso con spine bianche e corona di fiori rosa in primavera.',care:'Maneggialo con una striscia di carta piegata. Niente acqua d’inverno.'},
+ {id:'tillandsia',name:'Tillandsia',latin:'Tillandsia ionantha',env:'aperto',h:10,w:10,light:'Luce intensa',hum:'Media',price:[3,5],draw:'tillandsia',color:'#AFC0B5',noSoil:true,desc:'Pianta aerea: non va interrata, si appoggia su un sasso o un legnetto.',care:'Immergila in acqua 20 minuti ogni 10 giorni e lasciala asciugare capovolta.'}
+];
+const TP=Object.fromEntries(TPLANTS.map(p=>[p.id,p]));
+
+const DRAINS={
+ lapillo:{name:'Lapillo vulcanico',dens:0.9,price:[3,5],pack:'sacchetto da 3–5 L'},
+ ghiaia:{name:'Ghiaietto di fiume',dens:1.6,price:[2,4],pack:'sacchetto da 1–2 kg'},
+ argilla:{name:'Argilla espansa',dens:0.35,price:[3,5],pack:'sacchetto da 5 L'}
+};
+const SHAPES={
+ cilindro:{name:'Barattolo',dims:[['d','Diametro interno'],['h','Altezza']]},
+ boccia:{name:'Boccia',dims:[['d','Diametro'],['o','Apertura']]},
+ rett:{name:'Vasca',dims:[['w','Larghezza'],['p','Profondità'],['h','Altezza']]},
+ bottiglia:{name:'Bottiglia',dims:[['d','Diametro'],['h','Altezza'],['o','Collo']]}
+};
+
+/* =================== UTILITÀ =================== */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const pad2=n=>String(n).padStart(2,'0');
+const iso=d=>d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate());
+const parseISO=s=>{const [y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d)};
+const todayISO=()=>iso(new Date());
+const addDays=(s,n)=>{const d=parseISO(s);d.setDate(d.getDate()+n);return iso(d)};
+const diffDays=(a,b)=>Math.round((parseISO(b)-parseISO(a))/86400000);
+const fmtD=s=>{const d=parseISO(s);return GG3[d.getDay()]+' '+d.getDate()+' '+MESI3[d.getMonth()]};
+const num=(v,dec=1)=>Number(v).toLocaleString('it-IT',{maximumFractionDigits:dec,minimumFractionDigits:0});
+const eur=p=>{if(!p)return'';const[a,b]=p;const f=x=>x<10&&x%1?num(x,1):num(Math.round(x),0);return a===b?f(a)+' €':f(a)+'–'+f(b)+' €'};
+const uid=()=>Math.random().toString(36).slice(2,9);
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const r1=v=>Math.round(v*2)/2;
+const CUR_M=()=>new Date().getMonth()+1;
+function rng(seed){let a=seed>>>0;return()=>{a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function hashStr(s){let h=2166136261;for(const c of s)h=Math.imul(h^c.charCodeAt(0),16777619);return h>>>0}
+const monthsTxt=m=>m&&m.length?m.map(x=>MESI3[x-1]).join(', '):'—';
+const methodName=(c,m)=>m==='seme'?(c.seme&&c.seme.semenzaio?'Seme in semenzaio':'Seme'):m==='piantina'?'Piantina':'Bulbo / spicchi';
+const methods=c=>['seme','piantina','bulbo'].filter(k=>c[k]);
+
+/* =================== STATO =================== */
+const KEY='serra-di-casa-v1';
+function defaultTerr(){return{id:'t'+uid(),name:'Il nostro terrario',shape:'cilindro',d:17,h:24,w:30,p:18,o:9,closed:true,drain:'lapillo',rete:true,collina:true,plants:{felce:1,fittonia:1,'fittonia-rosa':1,selaginella:1,pilea:1},decor:{sassi:true,legno:true,ghiaietto:false},started:null}}
+function defaultContainers(){return[
+ {id:'c1',name:'Cassetta 1',type:'cassetta',l:80,w:30,h:25,d:40,crops:[{id:'ravanello',m:'seme',share:50},{id:'rucola',m:'seme',share:50}]},
+ {id:'c2',name:'Cassetta 2',type:'cassetta',l:80,w:30,h:25,d:40,crops:[{id:'lattuga',m:'piantina',share:50},{id:'spinacio',m:'seme',share:50}]},
+ {id:'c3',name:'Vaso del cavolo',type:'tondo',l:40,w:40,h:35,d:40,crops:[{id:'cavolonero',m:'piantina',share:70},{id:'aglio',m:'bulbo',share:30}]},
+ {id:'c4',name:'Vaso delle fave',type:'tondo',l:40,w:40,h:35,d:40,crops:[{id:'fave',m:'seme',share:100}]},
+ {id:'c5',name:'Aromatiche',type:'cassetta',l:60,w:20,h:20,d:40,crops:[{id:'rosmarino',m:'piantina',share:30},{id:'salvia',m:'piantina',share:25},{id:'timo',m:'piantina',share:20},{id:'origano',m:'piantina',share:25}]}
+]}
+function defaultState(){return{v:1,terr:{draft:defaultTerr(),saved:[]},orto:{containers:defaultContainers()},plantings:[],tasks:[],spesa:[],diario:[],water:{orto:null,arom:null,terr:null},example:true}}
+let S;
+try{S=JSON.parse(localStorage.getItem(KEY)||'null')}catch(e){S=null}
+function migrate(d){const x=Object.assign(defaultState(),d);x.water=Object.assign({orto:null,arom:null},x.water||{});if(x.water.terr){x.terr.saved.filter(t=>t.started).forEach(t=>{x.water['t:'+t.id]=x.water['t:'+t.id]||x.water.terr});delete x.water.terr}x.spesa=(x.spesa||[]).map(i=>Object.assign({srcName:i.src==='orto'?'Orto':i.src==='tools'?'Attrezzi di base':i.src==='m'?'Aggiunti a mano':'Terrario'},i));x.terr.draft.decor=x.terr.draft.decor||{};return x}
+if(!S||S.v!==1)S=defaultState();else S=migrate(S);
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){toast('Memoria piena: elimina qualche foto dal diario')}}
+const ui={tab:'oggi',oggiSeg:'oggi',terrSeg:'progetta',terrView:'risultato',stage:0,plantSeg:'orto',search:'',onlyNow:false,calM:null,calSel:todayISO(),sheet:null,edit:null,guide:null};
+try{const t=localStorage.getItem(KEY+'-tab');if(t)ui.tab=t}catch(e){}
+
+/* =================== GEOMETRIA TERRARIO =================== */
+function terrGeom(t){
+ const sh=t.shape;let H,maxW,open,wAt,area,depthTxt;
+ if(sh==='cilindro'){const D=+t.d;H=+t.h;maxW=D;open=D;wAt=()=>D;area=()=>Math.PI*D*D/4;depthTxt=`Ø ${num(D)} × ${num(H)} cm`}
+ else if(sh==='boccia'){const D=+t.d,R=D/2,o=Math.min(+t.o,D*0.95);H=R+Math.sqrt(Math.max(0,R*R-(o/2)**2));maxW=D;open=o;wAt=z=>2*Math.sqrt(Math.max(0,R*R-(z-R)**2));area=z=>Math.PI*(wAt(z)/2)**2;depthTxt=`Ø ${num(D)} cm, apertura ${num(o)} cm`}
+ else if(sh==='rett'){const W=+t.w,P=+t.p;H=+t.h;maxW=W;open=Math.min(W,P);wAt=()=>W;area=()=>W*P;depthTxt=`${num(W)} × ${num(P)} × ${num(H)} cm`}
+ else{const D=+t.d,o=Math.min(+t.o,D);H=+t.h;const Hb=H*0.62,Hs=H*0.8;maxW=D;open=o;wAt=z=>z<=Hb?D:z<=Hs?D-(D-o)*((z-Hb)/(Hs-Hb)):o;area=z=>Math.PI*(wAt(z)/2)**2;depthTxt=`Ø ${num(D)} × ${num(H)} cm, collo ${num(o)} cm`}
+ const vol=(a,b)=>{const n=40,dz=(b-a)/n;let v=0;for(let i=0;i<n;i++)v+=area(a+dz*(i+.5))*dz;return v};
+ return{shape:sh,H,maxW,open,wAt,area,vol,litri:vol(0,H)/1000,depthTxt};
+}
+
+function terrPlan(t){
+ const G=terrGeom(t),H=G.H,closed=t.closed,checks=[];
+ const succulentMode=!closed;
+ let dh=clamp(r1(H*(t.shape==='boccia'?0.15:0.11)),2,5);
+ let ch=H<16?0.5:1;
+ let sh=clamp(r1(H*(succulentMode?0.2:0.22)),4,9);
+ const maxT=H*0.42;
+ if(dh+ch+sh>maxT){sh=Math.max(3,r1(maxT-dh-ch));}
+ if(H<12)checks.push({l:'warn',t:'Contenitore molto basso: resta poco spazio per le piante. Scegli piante basse come selaginella, pilea o muschio.'});
+ const z1=dh,z2=dh+ch,S=z2+sh;
+ const ws=G.wAt(S);
+ const extra=t.collina&&ws>10?Math.min(3,sh*0.45):0;
+ const surf=x=>{const u=Math.abs(x)/(ws/2);return S+(u<1?extra*(1-u*u):0)};
+ const dr=DRAINS[t.drain]||DRAINS.lapillo;
+ const drainL=G.vol(0,z1)/1000, charL=G.vol(z1,z2)/1000, soilL=(G.vol(z2,S)+G.area(S)*extra*0.53)/1000;
+ const surfA=G.area(S);
+ const coverH=0.8;
+ const coverL=surfA*coverH/1000*0.6;
+ const charG=Math.max(10,Math.ceil(charL*500/10)*10);
+ const layers=[
+  {key:'drain',name:dr.name,z0:0,z1,L:drainL,qty:`${num(drainL,2)} L · circa ${num(Math.max(drainL*dr.dens*1000,50),0)} g`},
+  {key:'char',name:'Carbone attivo',z0:z1,z1:z2,L:charL,qty:`${charG} g`},
+  {key:closed?'soil':'cactus',name:closed?'Terriccio umido':'Terriccio per cactacee',z0:z2,z1:S,L:soilL,qty:`${num(soilL,2)} L`}
+ ];
+ // piante
+ const items=[];
+ Object.entries(t.plants||{}).forEach(([id,n])=>{const p=TP[id];if(p)for(let i=0;i<n;i++)items.push(p)});
+ const sorted=[...items].sort((a,b)=>b.h-a.h||a.id.localeCompare(b.id));
+ const species=[...new Set(sorted.map(p=>p.id))];
+ // posizioni
+ const margin=1.2,usable=Math.max(2,ws-2*margin),n=sorted.length;
+ const slots=[];for(let k=0;k<n;k++)slots.push(-usable/2+usable*(k+.5)/n);
+ const order=slots.map((x,i)=>i).sort((a,b)=>Math.abs(slots[a])-Math.abs(slots[b])||slots[a]-slots[b]);
+ const depthS=t.shape==='rett'?+t.p:ws;const Rj=rng(hashStr(t.id+'y'));
+ const placed=sorted.map((p,i)=>{let x=slots[order[i]];let back=i%2===0&&p.h>=10&&n>2;
+   if(p.draw==='ficus'){x=(i%2?1:-1)*(ws/2-1.4);back=true}
+   let y=(back?-depthS*.22:depthS*.16)+(Rj()-.5)*depthS*.12;if(p.draw==='ficus')y=-depthS/2+1.6;
+   if(t.shape!=='rett'){const lim=Math.max(0,ws/2-p.w*.3),d=Math.hypot(x,y);if(d>lim&&d>0){x*=lim/d;y*=lim/d}}else{y=clamp(y,-depthS/2+p.w*.3,depthS/2-p.w*.3)}
+   return{p,x,y,back}});
+ // fasi (passo per passo)
+ const steps=[];
+ const minOpen=G.open;
+ steps.push({title:'Prepara il contenitore',text:`Lava il vetro con acqua calda e aceto e asciugalo bene. Lava ghiaia e sassi. Annaffia le piantine nel vasetto un’ora prima. Copri il tavolo con un giornale.${minOpen<8?' L’apertura è stretta: prepara un imbuto di carta per versare gli strati e pinzette lunghe.':''}`});
+ const sDrain=steps.length;steps.push({title:'Strato di drenaggio',text:`Versa ${num(drainL,2)} L di ${dr.name.toLowerCase()} (circa ${num(Math.max(drainL*dr.dens*1000,50),0)} g) fino a ${num(dh)} cm di altezza e livellalo con il cucchiaio. Raccoglie l’acqua in eccesso lontano dalle radici.`});
+ let sRete=null;if(t.rete){sRete=steps.length;steps.push({title:'Rete separatrice',text:`Ritaglia un disco di rete per zanzariere largo ${num(G.wAt(z1))} cm e appoggialo sul drenaggio. Impedisce alla terra di scendere tra i sassi.`})}
+ const sChar=steps.length;steps.push({title:'Carbone attivo',text:`Spargi ${charG} g di carbone attivo in uno strato sottile di ${num(ch)} cm. Tiene puliti acqua e aria e limita muffe e cattivi odori.`});
+ const sSoil=steps.length;steps.push({title:closed?'Terriccio':'Substrato per piante grasse',text:closed?`Aggiungi ${num(soilL,2)} L di terriccio per piante verdi, già inumidito: stretto in mano deve restare compatto senza gocciolare. Arriva a ${num(sh)} cm${extra?` e modella al centro una collinetta alta ${num(extra)} cm in più: dà profondità alla scena`:''}.`:`Mescola terriccio per cactacee e lapillo fine in parti uguali: ne servono ${num(soilL,2)} L. Versalo asciutto fino a ${num(sh)} cm${extra?` con una collinetta di ${num(extra)} cm al centro`:''}.`});
+ const plantStage={};
+ species.forEach((id,i)=>{const p=TP[id];const cnt=items.filter(x=>x.id===id).length;plantStage[id]=steps.length;
+  const pos=i===0?'al centro o sul fondo, perché è la più alta':p.draw==='pilea'||p.draw==='ficus'?'vicino al vetro, così può ricadere o arrampicarsi':p.h<=6?'in primo piano, davanti':'tra le altre, lasciando 2 cm dal vetro';
+  steps.push({title:`Pianta: ${p.name}${cnt>1?' ×'+cnt:''}`,text:p.noSoil?`Non va interrata: appoggiala su un sasso o tra i rami del legnetto, ${pos}.`:`Togli la pianta dal vasetto e scuoti via metà della terra; accorcia le radici più lunghe. Scava una buca con il cucchiaio, ${pos}. Inseriscila con le pinzette e compatta la terra attorno.${p.h>H-S-2?' Attenzione: è alta quasi quanto lo spazio libero, accorciala.':''}`})});
+ let sCover=steps.length;
+ const mossCm2=Math.round(Math.max(surfA*0.3,surfA*0.85-items.reduce((a,p)=>a+Math.PI*(p.w*.5/2)**2,0)));
+ steps.push(closed?{title:'Muschio',text:`Copri la terra rimasta scoperta con muschio vivo: circa ${num(mossCm2,0)} cm². Premi bene i pezzi con le dita perché aderiscano.`}:{title:'Copertura decorativa',text:`Spargi ${num(coverL,2)} L di sabbia o ghiaino fine attorno alle piante: protegge il colletto dall’umidità.`});
+ let sDecor=null;const dec=t.decor||{};
+ if(dec.sassi||dec.legno||dec.ghiaietto){sDecor=steps.length;const d=[];if(dec.legno)d.push('appoggia il legnetto inclinato su un lato, puntandolo nella terra');if(dec.sassi)d.push('sistema 4–6 sassi vicino al vetro, in gruppi dispari');if(dec.ghiaietto)d.push('disegna un sentiero di ghiaietto bianco in primo piano');steps.push({title:'Decorazioni',text:d.join('; ').replace(/^./,c=>c.toUpperCase())+'.'})}
+ const waterMl=Math.max(20,Math.round(soilL*1000*(closed?0.08:0.05)/10)*10);
+ const sFinal=steps.length;
+ steps.push(closed?{title:'Annaffia e chiudi',text:`Spruzza ${waterMl} ml d’acqua su piante e muschio (meglio poca che troppa). Pulisci il vetro con il pennello e un panno, chiudi il coperchio. Mettilo in luce intensa ma mai al sole diretto.`}:{title:'Prima acqua',text:`Aspetta 3–4 giorni prima di annaffiare, così le radici rovinate guariscono. Poi versa ${waterMl} ml alla base delle piante. Tienilo vicino a una finestra luminosa, anche al sole del mattino.`});
+ // verifiche
+ const fp=items.reduce((a,p)=>a+Math.PI*(p.w*.5/2)**2,0);const ratio=surfA?fp/surfA:0;
+ if(!items.length)checks.push({l:'warn',t:'Non hai ancora scelto le piante.'});
+ else if(ratio>1.0)checks.push({l:'bad',t:`Troppe piante: occupano il ${Math.round(ratio*100)}% della superficie. Togline qualcuna o scegli un vaso più grande.`});
+ else if(ratio>0.78)checks.push({l:'warn',t:`Terrario pieno (${Math.round(ratio*100)}% della superficie): bello subito, ma dovrai potare spesso.`});
+ else checks.push({l:'ok',t:`Spazio giusto: le piante occupano il ${Math.round(ratio*100)}% della superficie e hanno margine per crescere.`});
+ const free=H-S;
+ const tooTall=species.map(id=>TP[id]).filter(p=>p.h>free-2);
+ if(tooTall.length)checks.push({l:'warn',t:`${tooTall.map(p=>p.name).join(', ')}: alta circa ${tooTall[0].h} cm, rischia di toccare il ${closed?'coperchio':'bordo'} (spazio libero ${num(free)} cm). Scegline una più bassa o accorciala.`});
+ else if(items.length)checks.push({l:'ok',t:`Altezza: ${num(free)} cm liberi sopra la terra, sufficienti per tutte le piante.`});
+ if(closed){const bad=species.map(id=>TP[id]).filter(p=>p.env==='aperto');if(bad.length)checks.push({l:'bad',t:`${bad.map(p=>p.name).join(', ')}: in un terrario chiuso marcisce per l’umidità. Usala solo in quello aperto.`})}
+ else{const hum=species.map(id=>TP[id]).filter(p=>p.env==='chiuso');if(hum.length)checks.push({l:'warn',t:`${hum.map(p=>p.name).join(', ')} vuole umidità alta: nel terrario aperto va spruzzata ogni 2–3 giorni.`})}
+ if(minOpen<3)checks.push({l:'bad',t:`Apertura di ${num(minOpen)} cm: troppo stretta per inserire piante con radici. Scegli un contenitore con bocca di almeno 6 cm.`});
+ else if(minOpen<6)checks.push({l:'warn',t:`Apertura di ${num(minOpen)} cm: servono pinzette lunghe e piantine piccole, con poca terra attaccata.`});
+ else checks.push({l:'ok',t:`Apertura di ${num(minOpen)} cm: ci lavori comodamente${minOpen<10?' con le pinzette':' anche con le mani'}.`});
+ if(!closed&&G.open<G.maxW*0.5)checks.push({l:'warn',t:'Per le piante grasse serve un contenitore con bocca larga: l’aria deve circolare.'});
+ const lights=[...new Set(species.map(id=>TP[id].light))];
+ // materiali
+ const mats=[];
+ const vp=G.litri<=2?[5,10]:G.litri<=6?[8,15]:G.litri<=12?[12,25]:[20,40];
+ mats.push({g:'Terrario',t:`Contenitore in vetro ${SHAPES[t.shape].name.toLowerCase()}${closed?' con coperchio':''}`,q:`${G.depthTxt} · ${num(G.litri,1)} L`,p:vp});
+ mats.push({g:'Terrario',t:dr.name,q:`${num(drainL,2)} L (${dr.pack})`,p:dr.price});
+ if(t.rete)mats.push({g:'Terrario',t:'Rete per zanzariere (un ritaglio)',q:`disco Ø ${num(G.wAt(z1),0)} cm`,p:[0,2]});
+ mats.push({g:'Terrario',t:'Carbone attivo per acquari',q:`${charG} g (confezione da 100–200 g)`,p:[4,6]});
+ if(closed)mats.push({g:'Terrario',t:'Terriccio per piante verdi',q:`${num(soilL,2)} L (sacchetto da 5 L)`,p:[3,5]});
+ else mats.push({g:'Terrario',t:'Terriccio per cactacee + lapillo fine',q:`${num(soilL,2)} L in totale, metà e metà`,p:[4,7]});
+ if(closed){const vasch=Math.max(1,Math.ceil(mossCm2/300));mats.push({g:'Terrario',t:'Muschio vivo in foglio',q:`${num(mossCm2,0)} cm² · ${vasch} ${vasch>1?'vaschette':'vaschetta'} 20×15 cm`,p:[4*vasch,6*vasch]})}
+ else mats.push({g:'Terrario',t:'Sabbia o ghiaino decorativo',q:`${num(coverL,2)} L`,p:[2,4]});
+ species.forEach(id=>{const p=TP[id];const c=items.filter(x=>x.id===id).length;mats.push({g:'Piante per terrario',t:`${p.name} (${p.latin})`,q:`${c} in vasetto da 6–8 cm`,p:[p.price[0]*c,p.price[1]*c]})});
+ if(dec.sassi)mats.push({g:'Terrario',t:'Sassi di fiume piccoli',q:'5–7 pezzi, lavati e bolliti',p:[0,3]});
+ if(dec.legno)mats.push({g:'Terrario',t:'Legnetto di radice o mangrovia',q:`lungo ${num(Math.round(ws*0.5),0)}–${num(Math.round(ws*0.7),0)} cm`,p:[3,6]});
+ if(dec.ghiaietto)mats.push({g:'Terrario',t:'Ghiaietto bianco decorativo',q:'una manciata (0,2 L)',p:[2,3]});
+ mats.push({g:'Attrezzi',t:'Pinzette lunghe 25–30 cm',q:'1',p:[5,8]});
+ mats.push({g:'Attrezzi',t:'Spruzzino per acqua',q:'1',p:[2,3]});
+ if(minOpen<8)mats.push({g:'Attrezzi',t:'Imbuto (o un cono di carta)',q:'1',p:[0,2]});
+ mats.forEach(m=>m.w=whereFor(m));
+ return{G,H,S,z1,z2,dh,ch,sh,extra,ws,depthS,surf,layers,items:placed,species,steps,stages:{drain:sDrain,rete:sRete,char:sChar,soil:sSoil,plant:plantStage,cover:sCover,decor:sDecor,final:sFinal},checks,mats,waterMl,lights,coverL,mossCm2};
+}
+
+/* =================== DISEGNO TERRARIO =================== */
+let svgN=0;
+function leafP(x,y,ang,len,wid){const r=ang*Math.PI/180,ux=Math.sin(r),uy=-Math.cos(r),px=-uy,py=ux;const tx=x+ux*len,ty=y+uy*len;const mx=x+ux*len*.45,my=y+uy*len*.45;return`M${x.toFixed(1)} ${y.toFixed(1)}Q${(mx-px*wid).toFixed(1)} ${(my-py*wid).toFixed(1)} ${tx.toFixed(1)} ${ty.toFixed(1)}Q${(mx+px*wid).toFixed(1)} ${(my+py*wid).toFixed(1)} ${x.toFixed(1)} ${y.toFixed(1)}Z`}
+function along(x,y,ang,d){const r=ang*Math.PI/180;return[x+Math.sin(r)*d,y-Math.cos(r)*d]}
+function shade(hex,amt){let c=hex.replace('#','');if(c.length===3)c=c.split('').map(x=>x+x).join('');const n=parseInt(c,16);let r=(n>>16)+amt,g=(n>>8&255)+amt,b=(n&255)+amt;r=clamp(r,0,255);g=clamp(g,0,255);b=clamp(b,0,255);return'#'+((1<<24)+(r<<16)+(g<<8)+b).toString(16).slice(1)}
+
+function drawPlant(p,bx,by,s,R){
+ const h=p.h*s,w=p.w*s,c=p.color;let o='';
+ switch(p.draw){
+ case'fittonia':case'hypoestes':{const n=p.draw==='fittonia'?9:8;const idx=[...Array(n).keys()].sort((a,b)=>Math.abs(b-(n-1)/2)-Math.abs(a-(n-1)/2));
+  for(const i of idx){const ang=-78+156*i/(n-1)+(R()-.5)*10;const len=h*(.5+R()*.18)*(1-Math.abs(ang)/260);const wid=len*.42;const col=shade(c,Math.round((R()-.5)*24));
+   const sx=bx+(R()-.5)*w*.15;o+=`<path d="${leafP(sx,by,ang,len,wid)}" fill="${col}" stroke="${shade(c,-30)}" stroke-width=".6"/>`;
+   if(p.draw==='fittonia'){const[tx,ty]=along(sx,by,ang,len*.9);o+=`<path d="M${sx} ${by}L${tx.toFixed(1)} ${ty.toFixed(1)}" stroke="${p.vein}" stroke-width=".9" opacity=".9"/>`;
+    for(const t of[.35,.55,.72]){const[mx,my]=along(sx,by,ang,len*t);for(const sg of[-1,1]){const[ex,ey]=along(mx,my,ang+sg*62,wid*.38);o+=`<path d="M${mx.toFixed(1)} ${my.toFixed(1)}L${ex.toFixed(1)} ${ey.toFixed(1)}" stroke="${p.vein}" stroke-width=".6" opacity=".85"/>`}}}
+   else{for(let k=0;k<5;k++){const t=.25+R()*.6;const[mx,my]=along(sx,by,ang,len*t);const[ex,ey]=along(mx,my,ang+(R()<.5?-90:90),wid*R()*.3);o+=`<circle cx="${ex.toFixed(1)}" cy="${ey.toFixed(1)}" r="${(1+R()*1.6*s/8).toFixed(1)}" fill="${p.spot}"/>`}}}
+  break}
+ case'felce':{const n=8;for(let i=0;i<n;i++){const ang=-72+144*i/(n-1)+(R()-.5)*8;const L=h*(.85+R()*.2)*(1-Math.abs(ang)/300);
+  const r=ang*Math.PI/180;const tip=[bx+Math.sin(r)*L,by-Math.cos(r)*L*.8+(Math.abs(ang)>35?L*.18:0)];const ctl=[bx+Math.sin(r)*L*.35,by-L*.7];
+  o+=`<path d="M${bx} ${by}Q${ctl[0].toFixed(1)} ${ctl[1].toFixed(1)} ${tip[0].toFixed(1)} ${tip[1].toFixed(1)}" stroke="${shade(c,-35)}" stroke-width="1" fill="none"/>`;
+  for(let k=2;k<12;k++){const t=k/12;const x=(1-t)*(1-t)*bx+2*(1-t)*t*ctl[0]+t*t*tip[0],y=(1-t)*(1-t)*by+2*(1-t)*t*ctl[1]+t*t*tip[1];
+   const dx=2*(1-t)*(ctl[0]-bx)+2*t*(tip[0]-ctl[0]),dy=2*(1-t)*(ctl[1]-by)+2*t*(tip[1]-ctl[1]);const a=Math.atan2(dx,-dy)*180/Math.PI;const ll=(1-t)*L*.16+1.2;
+   o+=`<path d="${leafP(x,y,a-58,ll,ll*.28)}" fill="${shade(c,k%2?6:-6)}"/><path d="${leafP(x,y,a+58,ll,ll*.28)}" fill="${shade(c,k%2?-4:8)}"/>`}}
+  break}
+ case'asplenium':{const n=7;for(let i=0;i<n;i++){const ang=-48+96*i/(n-1)+(R()-.5)*6;const len=h*(.85+R()*.2)*(1-Math.abs(ang)/200);o+=`<path d="${leafP(bx,by,ang,len,len*.17)}" fill="${shade(c,Math.round((R()-.5)*20))}" stroke="${shade(c,-25)}" stroke-width=".6"/>`;const[tx,ty]=along(bx,by,ang,len*.92);o+=`<path d="M${bx} ${by}L${tx.toFixed(1)} ${ty.toFixed(1)}" stroke="#2F4A1E" stroke-width=".8"/>`}break}
+ case'pilea':{for(let i=0;i<7;i++){const dir=i%2?1:-1;const reach=w*(.35+R()*.45);const ex=bx+dir*reach,ey=by+(R()<.5?h*.6:-h*.4);const cx=bx+dir*reach*.4,cy=by-h*(.6+R()*.4);
+  o+=`<path d="M${bx} ${by}Q${cx.toFixed(1)} ${cy.toFixed(1)} ${ex.toFixed(1)} ${ey.toFixed(1)}" stroke="#9A4B4B" stroke-width=".9" fill="none"/>`;
+  for(let k=1;k<=7;k++){const t=k/7;const x=(1-t)*(1-t)*bx+2*(1-t)*t*cx+t*t*ex,y=(1-t)*(1-t)*by+2*(1-t)*t*cy+t*t*ey;o+=`<ellipse cx="${(x+(R()-.5)*3).toFixed(1)}" cy="${y.toFixed(1)}" rx="${(s*.38).toFixed(1)}" ry="${(s*.3).toFixed(1)}" fill="${shade(c,Math.round((R()-.5)*26))}" stroke="${shade(c,-30)}" stroke-width=".4"/>`}}break}
+ case'selaginella':case'cuscino':case'soleirolia':{const cnt=p.draw==='soleirolia'?60:p.draw==='cuscino'?34:46;const rr=p.draw==='soleirolia'?s*.32:p.draw==='cuscino'?s*.75:s*.62;
+  for(let i=0;i<cnt;i++){const a=R()*Math.PI,d=Math.sqrt(R());const x=bx+Math.cos(a)*w*.5*d,y=by-Math.sin(a)*h*d;const col=p.draw==='cuscino'?shade(c,Math.round((R()-.3)*30)):shade(c,Math.round((R()-.5)*36));
+   if(p.draw==='selaginella'){const ang=(R()-.5)*120;o+=`<path d="${leafP(x,y+rr*.5,ang,rr*2.2,rr*.5)}" fill="${col}"/>`}else o+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${(rr*(.7+R()*.5)).toFixed(1)}" fill="${col}"/>`}break}
+ case'peperomia':{for(let i=0;i<8;i++){const ang=-65+130*i/7+(R()-.5)*14;const len=h*(.55+R()*.3);const[ex,ey]=along(bx,by,ang,len);o+=`<path d="M${bx} ${by}L${ex.toFixed(1)} ${ey.toFixed(1)}" stroke="#B9707A" stroke-width="1"/>`;o+=`<ellipse cx="${ex.toFixed(1)}" cy="${ey.toFixed(1)}" rx="${(w*.2).toFixed(1)}" ry="${(w*.16).toFixed(1)}" transform="rotate(${ang.toFixed(0)} ${ex.toFixed(1)} ${ey.toFixed(1)})" fill="${shade(c,Math.round((R()-.5)*20))}" stroke="${shade(c,28)}" stroke-width=".8"/>`}break}
+ case'cryptanthus':{const n=9;for(let i=0;i<n;i++){const ang=-86+172*i/(n-1);const len=w*.55*(1-Math.abs(Math.abs(ang)-86)/200);const lift=Math.abs(ang)>60?0:h*.1;o+=`<path d="${leafP(bx,by-lift,ang,len,len*.22)}" fill="${i%2?c:shade(c,-18)}" stroke="#E7C3CB" stroke-width=".7"/>`}o+=`<circle cx="${bx}" cy="${by-h*.15}" r="${(s*.6).toFixed(1)}" fill="${shade(c,-30)}"/>`;break}
+ case'ficus':{const dir=bx>0?1:-1;let x=bx,y=by;let path=`M${x} ${y}`;const pts=[];for(let k=1;k<=10;k++){x=bx+dir*Math.sin(k*.7)*s*.8;y=by-h*k/10;pts.push([x,y]);path+=`L${x.toFixed(1)} ${y.toFixed(1)}`}
+  o+=`<path d="${path}" stroke="#6B5A3A" stroke-width=".9" fill="none"/>`;pts.forEach(([x,y],k)=>{const ang=k%2?55:-55;o+=`<path d="${leafP(x,y,ang,s*1.1,s*.5)}" fill="${shade(c,Math.round((R()-.5)*24))}"/>`});break}
+ case'echeveria':{const rings=[[86,.55,7],[58,.47,7],[26,.36,5],[0,.22,3]];for(const[sp,lf,n]of rings){for(let i=0;i<n;i++){const ang=n===1?0:-sp+2*sp*i/(n-1);const len=w*lf;o+=`<path d="${leafP(bx,by,ang,len,len*.42)}" fill="${shade(c,Math.round((R()-.5)*16)-(sp>50?10:0))}" stroke="#7FA39A" stroke-width=".7"/>`;const[tx,ty]=along(bx,by,ang,len*.97);o+=`<circle cx="${tx.toFixed(1)}" cy="${ty.toFixed(1)}" r="1" fill="#D98BA0"/>`}}break}
+ case'haworthia':{const n=11;for(let i=0;i<n;i++){const ang=-48+96*i/(n-1)+(R()-.5)*8;const len=h*(.7+R()*.3)*(1-Math.abs(ang)/150);o+=`<path d="${leafP(bx,by,ang,len,len*.2)}" fill="${shade(c,Math.round((R()-.5)*20))}" stroke="${shade(c,-25)}" stroke-width=".5"/>`;for(let k=1;k<5;k++){const[mx,my]=along(bx,by,ang,len*k/5.5);o+=`<circle cx="${mx.toFixed(1)}" cy="${my.toFixed(1)}" r=".9" fill="#F2F4EE"/>`}}break}
+ case'crassula':{const th=h*.5;o+=`<path d="M${bx} ${by}L${bx} ${by-th}" stroke="#7A5C3E" stroke-width="${(s*.55).toFixed(1)}" stroke-linecap="round"/>`;const tops=[[-35,.5],[0,.55],[35,.45]];for(const[a,f]of tops){const[ex,ey]=along(bx,by-th,a,h*f);o+=`<path d="M${bx} ${by-th}L${ex.toFixed(1)} ${ey.toFixed(1)}" stroke="#7A5C3E" stroke-width="${(s*.35).toFixed(1)}" stroke-linecap="round"/>`;for(const sg of[-1,1]){const[lx,ly]=along(ex,ey,a+sg*60,s*.7);o+=`<ellipse cx="${lx.toFixed(1)}" cy="${ly.toFixed(1)}" rx="${(s*.9).toFixed(1)}" ry="${(s*.55).toFixed(1)}" transform="rotate(${(a+sg*60-90).toFixed(0)} ${lx.toFixed(1)} ${ly.toFixed(1)})" fill="${shade(c,Math.round((R()-.5)*20))}" stroke="#B8564A" stroke-width=".7"/>`}o+=`<ellipse cx="${ex.toFixed(1)}" cy="${(ey-s*.4).toFixed(1)}" rx="${(s*.55).toFixed(1)}" ry="${(s*.85).toFixed(1)}" fill="${shade(c,10)}" stroke="#B8564A" stroke-width=".7"/>`}break}
+ case'sedum':{for(let i=0;i<5;i++){const ang=-60+120*i/4;const len=h*(.4+R()*.5);const[ex,ey]=along(bx,by,ang,len);o+=`<path d="M${bx} ${by}L${ex.toFixed(1)} ${ey.toFixed(1)}" stroke="${shade(c,-40)}" stroke-width=".9"/>`;for(let k=0;k<7;k++){const a2=k*51;const[lx,ly]=along(ex,ey,a2,s*.45);o+=`<circle cx="${lx.toFixed(1)}" cy="${ly.toFixed(1)}" r="${(s*.38).toFixed(1)}" fill="${shade(c,Math.round((R()-.5)*26))}"/>`}o+=`<circle cx="${ex.toFixed(1)}" cy="${ey.toFixed(1)}" r="${(s*.35).toFixed(1)}" fill="${shade(c,25)}"/>`}break}
+ case'cactus':{const cw=w*.7;o+=`<rect x="${(bx-cw/2).toFixed(1)}" y="${(by-h).toFixed(1)}" width="${cw.toFixed(1)}" height="${h.toFixed(1)}" rx="${(cw/2).toFixed(1)}" fill="${c}" stroke="${shade(c,-30)}" stroke-width=".8"/>`;for(let k=1;k<4;k++){const x=bx-cw/2+cw*k/4;o+=`<path d="M${x.toFixed(1)} ${(by-h+cw*.25).toFixed(1)}L${x.toFixed(1)} ${(by-2).toFixed(1)}" stroke="${shade(c,-22)}" stroke-width=".7"/>`}
+  for(let k=0;k<26;k++){o+=`<circle cx="${(bx+(R()-.5)*cw*.85).toFixed(1)}" cy="${(by-h*R()*.95-1).toFixed(1)}" r=".9" fill="#F7F7F2"/>`}for(let k=0;k<6;k++){const a=-75+150*k/5;const[fx,fy]=along(bx,by-h+cw*.3,a,cw*.42);o+=`<circle cx="${fx.toFixed(1)}" cy="${fy.toFixed(1)}" r="${(s*.4).toFixed(1)}" fill="#E777A6"/>`}break}
+ case'tillandsia':{o+=`<ellipse cx="${bx}" cy="${by-s*.4}" rx="${(w*.35).toFixed(1)}" ry="${(s*.7).toFixed(1)}" fill="#8F8A80" stroke="#6E6A62" stroke-width=".7"/>`;const by2=by-s*.9;for(let i=0;i<14;i++){const ang=-80+160*i/13+(R()-.5)*10;const len=h*(.55+R()*.4)*(1-Math.abs(ang)/220);o+=`<path d="${leafP(bx,by2,ang,len,len*.07)}" fill="${shade(c,Math.round((R()-.5)*24))}"/>`}break}
+ }
+ return o;
+}
+
+function containerPath(G,X,Y){
+ const H=G.H,sh=G.shape;
+ if(sh==='cilindro'){const D=G.maxW,r=Math.min(1.6,D*.08);return`M${X(-D/2)} ${Y(H)}L${X(-D/2)} ${Y(r)}Q${X(-D/2)} ${Y(0)} ${X(-D/2+r)} ${Y(0)}L${X(D/2-r)} ${Y(0)}Q${X(D/2)} ${Y(0)} ${X(D/2)} ${Y(r)}L${X(D/2)} ${Y(H)}Z`}
+ if(sh==='boccia'){const R=G.maxW/2,o=G.open,Rp=Math.abs(X(R)-X(0));return`M${X(-o/2)} ${Y(H)}A${Rp} ${Rp} 0 1 0 ${X(o/2)} ${Y(H)}Z`}
+ if(sh==='rett'){const W=G.maxW;return`M${X(-W/2)} ${Y(H)}L${X(-W/2)} ${Y(0)}L${X(W/2)} ${Y(0)}L${X(W/2)} ${Y(H)}Z`}
+ const D=G.maxW,o=G.open,Hb=H*.62,Hs=H*.8,r=Math.min(1.6,D*.08);
+ return`M${X(-o/2)} ${Y(H)}L${X(-o/2)} ${Y(Hs)}Q${X(-D/2)} ${Y(Hs)} ${X(-D/2)} ${Y(Hb)}L${X(-D/2)} ${Y(r)}Q${X(-D/2)} ${Y(0)} ${X(-D/2+r)} ${Y(0)}L${X(D/2-r)} ${Y(0)}Q${X(D/2)} ${Y(0)} ${X(D/2)} ${Y(r)}L${X(D/2)} ${Y(Hb)}Q${X(D/2)} ${Y(Hs)} ${X(o/2)} ${Y(Hs)}L${X(o/2)} ${Y(H)}Z`;
+}
+
+function patterns(id,k){
+ const P=(name,base,dots,sz)=>{let o=`<pattern id="${id}${name}" width="${sz}" height="${sz}" patternUnits="userSpaceOnUse" patternTransform="scale(${k})"><rect width="${sz}" height="${sz}" fill="${base}"/>`;dots.forEach(d=>o+=`<circle cx="${d[0]}" cy="${d[1]}" r="${d[2]}" fill="${d[3]}"/>`);return o+'</pattern>'};
+ return P('lapillo','#6B4842',[[2,2,1.8,'#87594F'],[7,4,1.5,'#4E3330'],[4,8,1.7,'#9A6A5E'],[9,9,1.2,'#5D3E39']],11)
+  +P('ghiaia','#8E8C84',[[2.5,2.5,2.2,'#B4B2AA'],[8,3,1.9,'#74726B'],[5,8.5,2.3,'#C7C4BB'],[10,10,1.6,'#9E9C94']],12)
+  +P('argilla','#8A4E2C',[[3,3,2.7,'#B06A3C'],[9,4,2.4,'#9B5B33'],[6,9.5,2.6,'#C17A48'],[11.5,11,2,'#A3613A']],13)
+  +P('char','#1F1F1F',[[2,2,1,'#3A3A3A'],[6,5,1.3,'#0E0E0E'],[3,7,.9,'#474747']],8)
+  +P('soil','#4A3324',[[2,2,.9,'#634532'],[6,4,.7,'#2F2017'],[4,7,.8,'#73513B'],[8,8,.6,'#3A281C']],9)
+  +P('cactus','#8B735C',[[2,2,1,'#CDBDA2'],[6,5,.8,'#5E4B3A'],[3,7,.9,'#EDE4D3'],[8,8,.7,'#6E5844']],9)
+  +P('sand','#D8C59C',[[2,2,.9,'#BEA87F'],[6,4,.8,'#EBDDB9'],[4,7,.7,'#C9B48A']],8);
+}
+
+function drawTerr(t,plan,opt={}){
+ const G=plan.G,H=G.H,MW=G.maxW,closed=t.closed;
+ const thumb=!!opt.thumb,mode=opt.mode||'risultato';
+ const stage=mode==='passi'?opt.stage:99;
+ const showFinal=mode==='risultato'||(mode==='passi'&&stage>=plan.stages.final);
+ const labelW=(mode!=='risultato'&&!thumb)?172:0;
+ const maxPx=thumb?118:(labelW?220:280);
+ const s=Math.min(maxPx/MW,(thumb?150:330)/(H+2.5));
+ const padX=thumb?8:16,padT=(thumb?8:16)+2.2*s,padB=thumb?10:18;
+ const Wpx=padX*2+MW*s+labelW,Hpx=padT+H*s+padB;
+ const cx=padX+MW*s/2,floor=padT+H*s;
+ const X=cm=>+(cx+cm*s).toFixed(1),Y=z=>+(floor-z*s).toFixed(1);
+ const id='g'+(++svgN)+'_';
+ const k=thumb?.6:1;
+ const path=containerPath(G,X,Y);
+ let o=`<svg viewBox="0 0 ${Wpx.toFixed(0)} ${Hpx.toFixed(0)}" width="${Wpx.toFixed(0)}" height="${Hpx.toFixed(0)}" role="img" aria-label="Disegno del terrario in sezione"><defs>${patterns(id,k)}<clipPath id="${id}clip"><path d="${path}"/></clipPath><linearGradient id="${id}gl" x1="0" x2="1"><stop offset="0" stop-color="#fff" stop-opacity=".0"/><stop offset=".12" stop-color="#fff" stop-opacity=".35"/><stop offset=".22" stop-color="#fff" stop-opacity="0"/><stop offset=".85" stop-color="#fff" stop-opacity="0"/><stop offset=".93" stop-color="#fff" stop-opacity=".18"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient></defs>`;
+ o+=`<ellipse cx="${cx}" cy="${floor+3}" rx="${MW*s*.52}" ry="${Math.max(3,s*.8)}" fill="#000" opacity=".10"/>`;
+ o+=`<path d="${path}" fill="#CFE6E1" fill-opacity=".35"/>`;
+ o+=`<g clip-path="url(#${id}clip)">`;
+ const L=MW/2+1;
+ const drainKey=t.drain||'lapillo';
+ if(stage>=plan.stages.drain)o+=`<rect x="${X(-L)}" y="${Y(plan.z1)}" width="${(2*L*s).toFixed(1)}" height="${(plan.z1*s+2).toFixed(1)}" fill="url(#${id}${drainKey})"/>`;
+ if(t.rete&&plan.stages.rete!=null&&stage>=plan.stages.rete)o+=`<path d="M${X(-L)} ${Y(plan.z1)}L${X(L)} ${Y(plan.z1)}" stroke="#2E3A36" stroke-width="${thumb?1:1.6}" stroke-dasharray="3 2"/>`;
+ if(stage>=plan.stages.char)o+=`<rect x="${X(-L)}" y="${Y(plan.z2)}" width="${(2*L*s).toFixed(1)}" height="${((plan.z2-plan.z1)*s).toFixed(1)}" fill="url(#${id}char)"/>`;
+ const pts=[];const N=36;for(let i=0;i<=N;i++){const x=-L+2*L*i/N;pts.push([x,plan.surf(x)])}
+ if(stage>=plan.stages.soil){let d=`M${X(-L)} ${Y(plan.z2)}`;pts.forEach(([x,z])=>d+=`L${X(x)} ${Y(z)}`);d+=`L${X(L)} ${Y(plan.z2)}Z`;o+=`<path d="${d}" fill="url(#${id}${closed?'soil':'cactus'})"/>`}
+ const R=rng(hashStr(t.id+'x'));
+ const coverOn=stage>=plan.stages.cover;
+ if(coverOn&&!closed){let d=`M${X(-L)} ${Y(plan.surf(-L))}`;pts.forEach(([x,z])=>d+=`L${X(x)} ${Y(z+.7)}`);for(let i=pts.length-1;i>=0;i--)d+=`L${X(pts[i][0])} ${Y(pts[i][1])}`;o+=`<path d="${d}Z" fill="url(#${id}sand)"/>`}
+ // decorazioni dietro (legno)
+ const dec=t.decor||{};const decOn=plan.stages.decor!=null&&stage>=plan.stages.decor;
+ if(decOn&&dec.legno){const x0=-plan.ws/2+1,x1=-plan.ws*.12;const z0=plan.surf(x0)+.2,z1=plan.surf(x1)+Math.min(H-plan.S-3,H*.22);
+  o+=`<path d="M${X(x0)} ${Y(z0)}Q${X((x0+x1)/2)} ${Y(z1+1)} ${X(x1)} ${Y(z1)}" stroke="#6E4E33" stroke-width="${(s*.75).toFixed(1)}" stroke-linecap="round" fill="none"/><path d="M${X((x0+x1)/2)} ${Y((z0+z1)/2+.6)}L${X((x0+x1)/2+2)} ${Y((z0+z1)/2+2.4)}" stroke="#6E4E33" stroke-width="${(s*.4).toFixed(1)}" stroke-linecap="round"/><path d="M${X(x0)} ${Y(z0)}Q${X((x0+x1)/2)} ${Y(z1+1)} ${X(x1)} ${Y(z1)}" stroke="#9B7652" stroke-width="${(s*.2).toFixed(1)}" stroke-linecap="round" fill="none" opacity=".7"/>`}
+ // piante: prima quelle dietro
+ const drawList=[...plan.items.filter(i=>i.back),...plan.items.filter(i=>!i.back)];
+ drawList.forEach((it,idx)=>{const st=plan.stages.plant[it.p.id];if(stage<st)return;const z=plan.surf(it.x)+(it.back?.5:0);const sc=it.back?.92:1;const Rp=rng(hashStr(t.id+it.p.id+idx));
+  o+=`<g opacity="${it.back?.9:1}">${drawPlant(it.p,X(it.x),Y(z),s*sc,Rp)}</g>`});
+ // muschio davanti
+ if(coverOn&&closed){for(let x=-plan.ws/2;x<=plan.ws/2;x+=.75){const z=plan.surf(x);const col=['#5E8C3A','#6F9E45','#7FAE52','#557F33','#88B65E'][Math.floor(R()*5)];o+=`<circle cx="${X(x+(R()-.5)*.4)}" cy="${Y(z+.15)}" r="${((.42+R()*.28)*s).toFixed(1)}" fill="${col}"/>`}}
+ if(decOn&&dec.ghiaietto){for(let i=0;i<40;i++){const x=-plan.ws*.05+R()*plan.ws*.32;o+=`<circle cx="${X(x)}" cy="${Y(plan.surf(x)+.25+R()*.3)}" r="${((.2+R()*.18)*s).toFixed(1)}" fill="${['#F4F2EC','#E4E1D8','#FFFFFF'][i%3]}" stroke="#BDB9AE" stroke-width=".3"/>`}}
+ if(decOn&&dec.sassi){const xs=[plan.ws*.28,plan.ws*.36,-plan.ws*.33,plan.ws*.2];xs.forEach((x,i)=>{const rx=(.9+R()*.5)*s,ry=(.55+R()*.25)*s;const col=['#9C9A93','#7D7B75','#B8B5AD','#8B8780'][i];o+=`<ellipse cx="${X(x)}" cy="${(Y(plan.surf(x))-ry*.4).toFixed(1)}" rx="${rx.toFixed(1)}" ry="${ry.toFixed(1)}" fill="${col}" stroke="${shade(col,-25)}" stroke-width=".6"/><ellipse cx="${(X(x)-rx*.3).toFixed(1)}" cy="${(Y(plan.surf(x))-ry*.75).toFixed(1)}" rx="${(rx*.35).toFixed(1)}" ry="${(ry*.2).toFixed(1)}" fill="#fff" opacity=".35"/>`})}
+ if(showFinal&&closed){for(let i=0;i<16;i++){const z=H*(.62+R()*.33);const wz=G.wAt(z);const x=(R()-.5)*wz*.9;o+=`<circle cx="${X(x)}" cy="${Y(z)}" r="${(.8+R()*1.6)*(thumb?.6:1)}" fill="#fff" opacity="${(.35+R()*.3).toFixed(2)}"/>`}}
+ o+=`</g>`;
+ // vetro
+ o+=`<path d="${path}" fill="url(#${id}gl)" stroke="#6E9690" stroke-width="${thumb?1.6:2.6}" stroke-linejoin="round"/>`;
+ // coperchio
+ if(closed&&showFinal){
+  if(G.shape==='cilindro'){o+=`<rect x="${X(-MW/2)-3}" y="${Y(H)-1.5*s}" width="${MW*s+6}" height="${(1.5*s).toFixed(1)}" rx="${(.4*s).toFixed(1)}" fill="#C9A47B" stroke="#8E6B47" stroke-width="1.2"/><rect x="${X(-MW/2)-3}" y="${Y(H)-.45*s}" width="${MW*s+6}" height="${(.45*s).toFixed(1)}" fill="#D46E4E" opacity=".9"/>`}
+  else if(G.shape==='rett'){o+=`<rect x="${X(-MW/2)-3}" y="${Y(H)-.7*s}" width="${MW*s+6}" height="${(.7*s).toFixed(1)}" fill="#CFE6E1" fill-opacity=".6" stroke="#6E9690" stroke-width="1.6"/>`}
+  else{const ow=G.open*s;o+=`<path d="M${X(-G.open/2)+1} ${Y(H)+.8*s}L${X(-G.open/2)-1} ${Y(H)-1.4*s}L${X(G.open/2)+1} ${Y(H)-1.4*s}L${X(G.open/2)-1} ${Y(H)+.8*s}Z" fill="#C9A47B" stroke="#8E6B47" stroke-width="1.2"/>`;if(ow>30)o+=`<path d="M${X(-G.open/2)+4} ${Y(H)-.6*s}L${X(G.open/2)-4} ${Y(H)-.6*s}" stroke="#A9835C" stroke-width="1"/>`}
+ }
+ // etichette
+ if(labelW){
+  const lab=[];const lx=padX+MW*s+18;
+  const add=(z,txt,sub,st)=>{if(stage<st)return;lab.push({y:Y(z),yo:Y(z),edge:X(G.wAt(clamp(z,0,H))/2),txt,sub,cur:mode==='passi'&&st===stage})};
+  add(plan.z1/2,plan.layers[0].name,`${num(plan.dh)} cm · ${plan.layers[0].qty}`,plan.stages.drain);
+  if(t.rete&&plan.stages.rete!=null)add(plan.z1,'Rete separatrice','tra drenaggio e carbone',plan.stages.rete);
+  add((plan.z1+plan.z2)/2,'Carbone attivo',`${num(plan.ch)} cm · ${plan.layers[1].qty}`,plan.stages.char);
+  add((plan.z2+plan.S)/2,plan.layers[2].name,`${num(plan.sh)}${plan.extra?'+'+num(plan.extra):''} cm · ${plan.layers[2].qty}`,plan.stages.soil);
+  add(plan.S+plan.extra+.4,closed?'Muschio':'Sabbia decorativa',closed?`${num(plan.mossCm2,0)} cm²`:`${num(plan.coverL,2)} L`,plan.stages.cover);
+  if(plan.items.length){const firstSt=Math.min(...Object.values(plan.stages.plant));const avgH=plan.items.reduce((a,i)=>a+i.p.h,0)/plan.items.length;add(Math.min(H-1.5,plan.S+plan.extra+avgH*.6),'Piante',`${plan.items.length} in tutto`,firstSt)}
+  lab.sort((a,b)=>b.y-a.y);
+  for(let i=1;i<lab.length;i++){if(lab[i-1].y-lab[i].y<30)lab[i].y=lab[i-1].y-30}
+  const minY=14;if(lab.length&&lab[lab.length-1].y<minY){const sh=minY-lab[lab.length-1].y;lab.forEach(l=>l.y+=sh)}
+  lab.forEach(l=>{const ty=l.y;o+=`<path class="svline" d="M${Math.min(l.edge+3,lx-8)} ${l.yo??l.y}L${lx-6} ${ty}" />`;
+   o+=`<circle cx="${Math.min(l.edge+3,lx-8)}" cy="${l.yo??l.y}" r="2.2" class="${l.cur?'svcur':'svl'}"/><text x="${lx}" y="${ty-2}" class="${l.cur?'svl svcur':'svl'}">${esc(l.txt)}</text><text x="${lx}" y="${ty+12}" class="svm">${esc(l.sub)}</text>`});
+ }
+ return o+'</svg>';
+}
+
+function drawTop(t,plan){
+ const round=t.shape!=='rett';const Wc=plan.ws,Dc=plan.depthS;
+ const s=Math.min(270/Wc,250/Dc);const pad=22;const W=Wc*s+pad*2,H=Dc*s+pad*2+18;const cx=W/2,cy=pad+Dc*s/2;
+ const id='g'+(++svgN)+'_';const X=x=>+(cx+x*s).toFixed(1),Y=y=>+(cy+y*s).toFixed(1);
+ const shape=round?`<circle cx="${cx}" cy="${cy}" r="${(Wc*s/2).toFixed(1)}"/>`:`<rect x="${pad}" y="${pad}" width="${(Wc*s).toFixed(1)}" height="${(Dc*s).toFixed(1)}"/>`;
+ let o=`<svg viewBox="0 0 ${W.toFixed(0)} ${H.toFixed(0)}" width="${W.toFixed(0)}" height="${H.toFixed(0)}" role="img" aria-label="Terrario visto dall’alto"><defs>${patterns(id,1)}<clipPath id="${id}c">${shape}</clipPath></defs>`;
+ o+=`<g clip-path="url(#${id}c)"><rect width="${W}" height="${H}" fill="url(#${id}${t.closed?'soil':'sand'})"/>`;
+ const R=rng(hashStr(t.id+'top'));
+ if(t.closed){const n=Math.round(Wc*Dc/1.6);for(let i=0;i<n;i++){const x=(R()-.5)*Wc,y=(R()-.5)*Dc;o+=`<circle cx="${X(x)}" cy="${Y(y)}" r="${((.45+R()*.35)*s).toFixed(1)}" fill="${['#5E8C3A','#6F9E45','#7FAE52','#557F33','#88B65E'][Math.floor(R()*5)]}"/>`}}
+ const dec=t.decor||{};
+ if(dec.legno){o+=`<path d="M${X(-Wc/2+1)} ${Y(-Dc*.1)}L${X(-Wc*.12)} ${Y(-Dc*.28)}" stroke="#6E4E33" stroke-width="${(s*.8).toFixed(1)}" stroke-linecap="round"/><path d="M${X(-Wc*.3)} ${Y(-Dc*.19)}L${X(-Wc*.26)} ${Y(-Dc*.05)}" stroke="#6E4E33" stroke-width="${(s*.45).toFixed(1)}" stroke-linecap="round"/>`}
+ if(dec.ghiaietto){for(let i=0;i<70;i++){const x=-Wc*.05+R()*Wc*.32,y=Dc*.12+R()*Dc*.3;o+=`<circle cx="${X(x)}" cy="${Y(y)}" r="${((.22+R()*.18)*s).toFixed(1)}" fill="#F2F0EA" stroke="#BDB9AE" stroke-width=".3"/>`}}
+ if(dec.sassi){[[.28,.3],[.36,.18],[-.33,.28],[.2,.38]].forEach(([fx,fy],i)=>{const col=['#9C9A93','#7D7B75','#B8B5AD','#8B8780'][i];const rx=(.9+R()*.5)*s,ry=(.7+R()*.3)*s;o+=`<ellipse cx="${X(fx*Wc)}" cy="${Y(fy*Dc)}" rx="${rx.toFixed(1)}" ry="${ry.toFixed(1)}" fill="${col}" stroke="${shade(col,-25)}" stroke-width=".6"/>`})}
+ const sp=[...plan.species];const items=[...plan.items].sort((a,b)=>a.y-b.y);
+ items.forEach((it,k)=>{const p=it.p,px=X(it.x),py=Y(it.y),Rp=rng(hashStr(t.id+p.id+k)),rad=p.w*.42*s;
+  const nl=p.draw==='felce'?9:p.draw==='selaginella'||p.draw==='soleirolia'||p.draw==='cuscino'?0:p.draw==='cactus'?0:p.draw==='tillandsia'||p.draw==='haworthia'?14:8;
+  if(nl===0){const cnt=p.draw==='cactus'?1:26;if(p.draw==='cactus'){o+=`<circle cx="${px}" cy="${py}" r="${(rad*.8).toFixed(1)}" fill="${p.color}" stroke="${shade(p.color,-30)}"/>`;for(let i=0;i<12;i++){const a=i*30;const[ex,ey]=along(px,py,a,rad*.55);o+=`<circle cx="${ex.toFixed(1)}" cy="${ey.toFixed(1)}" r="1.1" fill="#F7F7F2"/>`}o+=`<circle cx="${px}" cy="${py}" r="${(rad*.25).toFixed(1)}" fill="#E777A6"/>`}
+   else for(let i=0;i<cnt;i++){const a=Rp()*Math.PI*2,d=Math.sqrt(Rp())*rad;o+=`<circle cx="${(px+Math.cos(a)*d).toFixed(1)}" cy="${(py+Math.sin(a)*d).toFixed(1)}" r="${(s*(p.draw==='soleirolia'?.3:.6)).toFixed(1)}" fill="${shade(p.color,Math.round((Rp()-.5)*34))}"/>`}}
+  else{for(let i=0;i<nl;i++){const a=i*360/nl+Rp()*14;const len=rad*(.85+Rp()*.25);const wf=p.draw==='felce'?.18:p.draw==='tillandsia'||p.draw==='haworthia'?.12:p.draw==='echeveria'?.42:.38;o+=`<path d="${leafP(px,py,a,len,len*wf)}" fill="${shade(p.color,Math.round((Rp()-.5)*24))}" stroke="${shade(p.color,-30)}" stroke-width=".5"/>`}
+   if(p.draw==='echeveria'){for(let i=0;i<6;i++)o+=`<path d="${leafP(px,py,i*60+30,rad*.5,rad*.22)}" fill="${shade(p.color,12)}" stroke="#7FA39A" stroke-width=".5"/>`}}
+ });
+ o+=`</g><g fill="none" stroke="#6E9690" stroke-width="3">${shape}</g>`;
+ items.forEach(it=>{const n=sp.indexOf(it.p.id)+1;o+=`<circle cx="${X(it.x)}" cy="${Y(it.y)}" r="9" fill="#17231B" fill-opacity=".78"/><text x="${X(it.x)}" y="${Y(it.y)+4}" text-anchor="middle" font-size="11" font-weight="700" fill="#fff" font-family="Atkinson Hyperlegible,system-ui">${n}</text>`});
+ o+=`<text x="${cx}" y="${H-6}" text-anchor="middle" class="svm">davanti (il lato che guardi)</text><text x="${cx}" y="${pad-8}" text-anchor="middle" class="svm">dietro</text>`;
+ return o+'</svg>';
+}
+function plantPic(p,size=52){const s=size/Math.max(p.h+3,p.w+2)*.95;const R=rng(hashStr(p.id));return`<svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" aria-hidden="true"><rect x="0" y="${size*.82}" width="${size}" height="${size*.18}" fill="#4A3324"/>${drawPlant(p,size/2,size*.84,s,R)}</svg>`}
+function shapeIcon(k){const m={cilindro:'<rect x="8" y="7" width="18" height="22" rx="3"/><path d="M7 7h20"/>',boccia:'<path d="M13 5h8M14 5v4.5a10 10 0 1 0 6 0V5"/>',rett:'<rect x="5" y="10" width="24" height="17"/><path d="M4 10h26"/>',bottiglia:'<path d="M14 4h6v6c4 2 6 4 6 8v11H8V18c0-4 2-6 6-8z"/>'};return`<svg viewBox="0 0 34 34">${m[k]}</svg>`}
+
+/* =================== ORTO =================== */
+function contGeom(c){const t=c.type;let area,vol,dimTxt;const h=+c.h;
+ if(t==='tondo'){const D=+c.d;area=Math.PI*D*D/4*.92;dimTxt=`Ø ${D} × ${h} cm`}
+ else if(t==='quadrato'){area=c.l*c.l;dimTxt=`${c.l} × ${c.l} × ${h} cm`}
+ else{area=c.l*c.w;dimTxt=`${c.l} × ${c.w} × ${h} cm`}
+ const drainCm=h>=20?3:2;const soilL=area*(h-drainCm-2.5)/1000;const drainL=area*drainCm/1000;const totL=area*h/1000;
+ return{area,soilL:Math.max(0,soilL),drainL,totL,dimTxt,drainCm};}
+
+function ortoLayout(c){
+ const crops=c.crops.filter(x=>CROP[x.id]);const tot=crops.reduce((a,x)=>a+(+x.share||1),0)||1;const zones=[];
+ if(c.type==='tondo'&&crops.length>1&&CROP[crops[0].id].sp>=c.d*0.6){const R=c.d/2;const big=crops[0],bc=CROP[big.id];zones.push({cz:big,cr:bc,a0:-Math.PI/2,a1:-Math.PI/2,pts:[[0,0]],tight:bc.sp>c.d});
+  const rest=crops.slice(1);const rt=rest.reduce((a,x)=>a+(+x.share||1),0)||1;let a0=-Math.PI/2;
+  rest.forEach(cz=>{const cr=CROP[cz.id];const a1=a0+(+cz.share||1)/rt*2*Math.PI;const rr=R-Math.max(3,cr.sp*.55);const pts=[];if(rr>0){const n=Math.max(1,Math.floor((a1-a0)*rr/cr.sp));for(let i=0;i<n;i++){const a=a0+(a1-a0)*(i+.5)/n;pts.push([Math.cos(a)*rr,Math.sin(a)*rr])}}zones.push({cz,cr,a0,a1,pts,tight:false,ring:true});a0=a1});
+  return{round:true,R,zones,ringMode:true}}
+ if(c.type==='tondo'){const R=c.d/2;let a0=-Math.PI/2;let first=true;
+  crops.forEach(cz=>{const cr=CROP[cz.id];const frac=(+cz.share||1)/tot;const a1=a0+frac*2*Math.PI;const sp=cr.sp;const pts=[];
+   const kk=Math.ceil(R/sp)+1;for(let i=-kk;i<=kk;i++)for(let j=-kk;j<=kk;j++){const x=i*sp,y=j*sp;const d=Math.hypot(x,y);if(d>R-sp*.4)continue;
+    if(d<1e-6){if(first)pts.push([x,y]);continue}let a=Math.atan2(y,x);while(a<a0)a+=2*Math.PI;if(a<a1||crops.length===1)pts.push([x,y])}
+   let tight=false;if(!pts.length&&R*frac*2>sp*.4){const am=(a0+a1)/2;pts.push([Math.cos(am)*R*.5,Math.sin(am)*R*.5]);tight=true}
+   zones.push({cz,cr,a0,a1,pts,tight});a0=a1;first=false});
+  return{round:true,R,zones}}
+ const L=+c.l,W=c.type==='quadrato'?+c.l:+c.w;let x0=0;
+ crops.forEach(cz=>{const cr=CROP[cz.id];const len=L*(+cz.share||1)/tot;const sp=cr.sp;let nx=Math.floor(len/sp),ny=Math.floor(W/sp);let tight=false;
+  if((nx<1||ny<1)&&len>=sp*.5&&W>=sp*.5){nx=Math.max(1,nx);ny=Math.max(1,ny);tight=true}
+  const pts=[];const ox=x0+(len-nx*sp)/2+sp/2,oy=(W-ny*sp)/2+sp/2;for(let i=0;i<nx;i++)for(let j=0;j<ny;j++)pts.push([ox+i*sp,oy+j*sp]);
+  if(tight&&pts.length===1){pts[0]=[x0+len/2,W/2]}
+  zones.push({cz,cr,x0,x1:x0+len,pts,tight});x0+=len});
+ return{round:false,L,W,zones};
+}
+
+function drawOrto(c,maxW=320){
+ const lay=ortoLayout(c);let o='';
+ if(lay.round){const s=Math.min(200,maxW-20)/c.d;const R=lay.R*s;const W=R*2+24,H=R*2+24,cx=W/2,cy=H/2;
+  o+=`<svg viewBox="0 0 ${W.toFixed(0)} ${H.toFixed(0)}" width="${W.toFixed(0)}" height="${H.toFixed(0)}" role="img" aria-label="Vaso visto dall’alto"><circle cx="${cx}" cy="${cy}" r="${R+7}" fill="#3F4B44"/><circle cx="${cx}" cy="${cy}" r="${R+2}" fill="#56645B"/><circle cx="${cx}" cy="${cy}" r="${R}" fill="#5A3D2B"/>`;
+  if(lay.zones.length>1&&!lay.ringMode)lay.zones.forEach(z=>{o+=`<path d="M${cx} ${cy}L${(cx+Math.cos(z.a0)*R).toFixed(1)} ${(cy+Math.sin(z.a0)*R).toFixed(1)}" stroke="#fff" stroke-opacity=".55" stroke-dasharray="4 3"/>`});
+  lay.zones.forEach(z=>{const r=Math.max(3,(lay.ringMode&&!z.ring?Math.min(z.cr.sp*.42,lay.R*.45):z.cr.sp*.42)*s);z.pts.forEach(([x,y])=>o+=`<circle cx="${(cx+x*s).toFixed(1)}" cy="${(cy+y*s).toFixed(1)}" r="${r.toFixed(1)}" fill="${z.cr.color}" stroke="#fff" stroke-opacity=".75" stroke-width="1.2"/>`)});
+  lay.zones.forEach(z=>{const am=(z.a0+z.a1)/2;let lx=lay.zones.length===1?cx:cx+Math.cos(am)*R*.62,ly=lay.zones.length===1?cy+R*.62:cy+Math.sin(am)*R*.62;if(lay.ringMode){if(!z.ring){lx=cx;ly=cy}else{const pm=z.pts[Math.floor(z.pts.length/2)]||[0,lay.R*.8];lx=cx+pm[0]*s;ly=cy+pm[1]*s}}const tw=z.cr.name.length*6.4+12;o+=`<rect x="${(lx-tw/2).toFixed(1)}" y="${(ly-10).toFixed(1)}" width="${tw.toFixed(1)}" height="19" rx="9.5" fill="#000" fill-opacity=".6"/><text x="${lx.toFixed(1)}" y="${(ly+4).toFixed(1)}" text-anchor="middle" font-size="11.5" font-weight="700" fill="#fff" font-family="Atkinson Hyperlegible,system-ui">${esc(z.cr.name)}</text>`});
+  return{svg:o+'</svg>',lay}}
+ const s=Math.min((maxW-24)/lay.L,170/lay.W);const w=lay.L*s,h=lay.W*s;const W=w+24,H=h+24;
+ o+=`<svg viewBox="0 0 ${W.toFixed(0)} ${H.toFixed(0)}" width="${W.toFixed(0)}" height="${H.toFixed(0)}" role="img" aria-label="Contenitore visto dall’alto"><rect x="3" y="3" width="${(w+18).toFixed(1)}" height="${(h+18).toFixed(1)}" rx="6" fill="#3F4B44"/><rect x="9" y="9" width="${(w+6).toFixed(1)}" height="${(h+6).toFixed(1)}" rx="3" fill="#56645B"/><rect x="12" y="12" width="${w.toFixed(1)}" height="${h.toFixed(1)}" fill="#5A3D2B"/>`;
+ lay.zones.forEach((z,i)=>{if(i>0)o+=`<path d="M${(12+z.x0*s).toFixed(1)} 12V${(12+h).toFixed(1)}" stroke="#fff" stroke-opacity=".55" stroke-dasharray="4 3"/>`;const r=Math.max(2.5,z.cr.sp*.42*s);z.pts.forEach(([x,y])=>o+=`<circle cx="${(12+x*s).toFixed(1)}" cy="${(12+y*s).toFixed(1)}" r="${r.toFixed(1)}" fill="${z.cr.color}" stroke="#fff" stroke-opacity=".75" stroke-width="1.1"/>`)});
+ lay.zones.forEach(z=>{const lx=12+(z.x0+z.x1)/2*s;const name=z.cr.name.split(' (')[0];const fs=11;const tw=Math.min(name.length*6.2+12,(z.x1-z.x0)*s-4);o+=`<rect x="${(lx-tw/2).toFixed(1)}" y="${(12+h/2-9).toFixed(1)}" width="${Math.max(tw,10).toFixed(1)}" height="18" rx="9" fill="#000" fill-opacity=".6"/><text x="${lx.toFixed(1)}" y="${(12+h/2+4).toFixed(1)}" text-anchor="middle" font-size="${fs}" font-weight="700" fill="#fff" font-family="Atkinson Hyperlegible,system-ui" textLength="${tw-10<name.length*6.2?(tw-10).toFixed(0):''}" lengthAdjust="spacingAndGlyphs">${esc(name)}</text>`});
+ return{svg:o.replace(/ textLength=""/g,'')+'</svg>',lay};
+}
+
+function ortoChecks(c){
+ const out=[];const m=CUR_M();const lay=ortoLayout(c);
+ c.crops.forEach(cz=>{const cr=CROP[cz.id];if(!cr)return;
+  if(cr.minH>c.h)out.push({l:'bad',t:`${cr.name}: serve un vaso profondo almeno ${cr.minH} cm (questo è ${c.h} cm).`});
+  const mm=cr[cz.m]&&cr[cz.m].m;if(mm&&!mm.includes(m))out.push({l:'warn',t:`${cr.name} (${methodName(cr,cz.m).toLowerCase()}): fuori periodo. Ad Alcamo si fa in ${monthsTxt(mm)}.`});
+  if(cr.alone&&c.crops.length>1)out.push({l:'warn',t:`${cr.name} invade i vicini: meglio un vaso tutto suo.`});
+ });
+ lay.zones.forEach(z=>{if(!z.pts.length)out.push({l:'bad',t:`${z.cr.name}: spazio insufficiente, servono almeno ${z.cr.sp} cm. Aumenta la sua quota o usa un vaso più grande.`});else if(z.tight)out.push({l:'warn',t:`${z.cr.name}: entra una sola pianta e starà stretta. Tra 1–2 anni rinvasala.`})});
+ for(let i=0;i<c.crops.length;i++)for(let j=i+1;j<c.crops.length;j++){const a=CROP[c.crops[i].id],b=CROP[c.crops[j].id];if(!a||!b)continue;
+  if(a.avoid.includes(b.id)||b.avoid.includes(a.id))out.push({l:'warn',t:`${a.name} e ${b.name} non vanno d’accordo: meglio in vasi separati.`});
+  else if(a.friends.includes(b.id)||b.friends.includes(a.id))out.push({l:'ok',t:`${a.name} e ${b.name} stanno bene insieme.`})}
+ return out;
+}
+
+function ortoMats(conts){
+ const mats=[];let soil=0,drain=0,mixL=0;
+ conts.forEach(c=>{const g=contGeom(c);soil+=g.soilL;drain+=g.drainL;
+  const p=g.totL<10?[4,8]:g.totL<25?[6,12]:g.totL<50?[10,20]:g.totL<100?[18,35]:[35,80];
+  mats.push({g:'Contenitori',t:`${c.name}: ${c.type==='tondo'?'vaso tondo':c.type==='quadrato'?'vaso quadrato':c.type==='fioriera'?'fioriera':'cassetta'} con fori`,q:`${g.dimTxt} · ${num(g.totL,0)} L`,p});
+  mats.push({g:'Contenitori',t:`Sottovaso per ${c.name}`,q:c.type==='tondo'?`Ø ${c.d} cm`:`${c.l} cm`,p:[2,5]});
+  const aro=c.crops.filter(x=>CROP[x.id]&&CROP[x.id].mix).reduce((a,x)=>a+(+x.share||0),0)/(c.crops.reduce((a,x)=>a+(+x.share||0),0)||1);mixL+=g.soilL*aro/3;
+ });
+ const sacchi50=Math.ceil(soil/50);const resto=soil-(sacchi50-1)*50;
+ if(soil>0)mats.push({g:'Terra e substrati',t:'Terriccio per orto (con concime organico)',q:`${num(soil,0)} L → ${soil<=20?'1 sacco da 20 L':sacchi50+' sacc'+(sacchi50>1?'hi':'o')+' da 50 L'}`,p:soil<=20?[4,6]:[7*sacchi50,10*sacchi50]});
+ if(drain>0){const n=Math.ceil(drain/10);mats.push({g:'Terra e substrati',t:'Argilla espansa',q:`${num(drain,0)} L → ${n} sacc${n>1?'hi':'o'} da 10 L`,p:[4*n,6*n]})}
+ if(soil>0){const kg=Math.max(3,Math.ceil(soil*.1*.6));mats.push({g:'Terra e substrati',t:'Humus di lombrico o letame pellettato',q:`${kg} kg (1 parte ogni 10 di terriccio)`,p:[kg*1.2,kg*2]})}
+ if(mixL>0)mats.push({g:'Terra e substrati',t:'Sabbia di fiume o lapillo fine (per le aromatiche)',q:`${num(Math.max(2,mixL),0)} L`,p:[3,5]});
+ mats.push({g:'Terra e substrati',t:'Concime liquido per orto',q:'flacone da 1 L',p:[6,8]});
+ const seen={};let sup=0;
+ conts.forEach(c=>{const lay=ortoLayout(c);lay.zones.forEach(z=>{const cr=z.cr,m=z.cz.m;const k=cr.id+'|'+m;const n=z.pts.length;if(!seen[k])seen[k]={cr,m,n:0,conts:[]};seen[k].n+=n;seen[k].conts.push(c.name);if(cr.support)sup+=cr.id==='pomodoro'||cr.id==='peperone'||cr.id==='melanzana'?n:4})});
+ Object.values(seen).forEach(({cr,m,n,conts})=>{const pr=cr.price[m]||[1,2];
+  if(m==='seme')mats.push({g:'Semi e bulbi',t:`Semi di ${cr.name.toLowerCase()}`,q:cr.id==='fave'||cr.id==='piselli'?`${Math.max(20,n*3)} semi (busta da 200–250 g)`:`1 bustina (per ${n} piante)`,p:pr});
+  else if(m==='bulbo'){const teste=Math.max(1,Math.ceil(n/10));mats.push({g:'Semi e bulbi',t:`${cr.name} da semina`,q:`${n} spicchi → ${teste} test${teste>1?'e':'a'}`,p:[pr[0]*teste,pr[1]*teste]})}
+  else{const q=cr.id==='cipollotto'?`1 mazzetto (${n} piantine)`:`${n} piantin${n>1?'e':'a'}`;const mult=cr.id==='cipollotto'?1:n;mats.push({g:'Piantine',t:cr.name+(cr.cat==='aromatica'?' in vaso 14 cm':' in alveolo'),q,p:[pr[0]*mult,pr[1]*mult]})}});
+ if(sup)mats.push({g:'Attrezzi',t:'Canne di bambù 120–150 cm e spago',q:`${sup} canne`,p:[Math.ceil(sup*.4),Math.ceil(sup*.7)]});
+ mats.forEach(m=>m.w=whereFor(m));
+ return mats;
+}
+function whereFor(m){const t=m.t,g=m.g;
+ if(/vetro/i.test(t))return'Casalinghi, IKEA, brico o mercatino dell’usato';
+ if(/Carbone/.test(t))return'Negozio di acquari o online';
+ if(/Muschio vivo/.test(t))return'Vivaio o negozio di terrariofilia (non raccoglierlo nei boschi)';
+ if(/Rete per zanzariere/.test(t))return'Ferramenta o brico (basta un ritaglio)';
+ if(/Legnetto|Ghiaietto bianco|Sabbia o ghiaino|Pinzette/.test(t))return'Negozio di acquari o terrariofilia';
+ if(/Sassi di fiume/.test(t))return'Vivaio o negozio di acquari; lavali e bollili 5 minuti';
+ if(/Spruzzino|Imbuto/.test(t))return'Casalinghi o brico';
+ if(/Lapillo|Ghiaietto di fiume|Argilla espansa/.test(t))return'Vivaio o brico, reparto giardinaggio';
+ if(g==='Piante per terrario')return'Vivaio o negozio di terrariofilia';
+ if(/Terriccio|Humus|Concime|Sabbia/.test(t))return'Vivaio, consorzio agrario o brico';
+ if(g==='Contenitori')return'Brico o vivaio';
+ if(g==='Semi e bulbi')return'Vivaio o consorzio agrario';
+ if(g==='Piantine')return'Vivaio o mercato contadino';
+ if(g==='Attrezzi')return'Brico o vivaio';
+ return'';}
+const BASE_TOOLS=[
+ {g:'Attrezzi',t:'Paletta e trapiantatoio',q:'1 set',p:[5,8]},
+ {g:'Attrezzi',t:'Annaffiatoio 5–10 L con doccetta',q:'1',p:[6,10]},
+ {g:'Attrezzi',t:'Guanti da giardino',q:'2 paia',p:[4,8]},
+ {g:'Attrezzi',t:'Etichette e pennarello indelebile',q:'1 confezione',p:[3,4]},
+ {g:'Attrezzi',t:'Forbici da potatura piccole',q:'1',p:[6,12]},
+ {g:'Attrezzi',t:'Tessuto non tessuto (per le notti fredde)',q:'1 rotolo 1,6 × 5 m',p:[4,7]},
+ {g:'Attrezzi',t:'Sapone di Marsiglia (contro gli afidi)',q:'1 panetto',p:[2,3]}
+];
+
+/* =================== COMPITI =================== */
+function cropTasks(pl){
+ const cr=CROP[pl.crop];const T=[];const add=(d,title,note)=>T.push({id:uid(),date:addDays(pl.date,d),title,note,src:'p:'+pl.id,done:false});
+ const hv=cr.hv[pl.m]||60;
+ if(pl.m==='seme'){const g=cr.seme.g;add(g[1],`Controlla se ${cr.name.toLowerCase()} è germogliata`,`Di solito spunta in ${g[0]}–${g[1]} giorni. Tieni la superficie umida.`);
+  if(cr.seme.semenzaio)add(35,`Trapianta ${cr.name.toLowerCase()} nel vaso`,`Quando le piantine hanno 4–6 foglie vere. Distanza ${cr.sp} cm.`);
+  else if(!['fave','piselli','zucchina','fagiolino'].includes(cr.id))add(g[1]+10,`Dirada ${cr.name.toLowerCase()} a ${cr.sp} cm`,'Tieni le piantine più forti; quelle tolte si mangiano in insalata.');
+  if(hv<=45)[14,28].forEach(d=>add(d,`Nuova semina di ${cr.name.toLowerCase()}`,'Semina a scalare: una fila nuova ogni 2 settimane per avere sempre raccolto.'));}
+ else if(pl.m==='piantina')add(5,`Controlla l’attecchimento di ${cr.name.toLowerCase()}`,'Foglie dritte e sode: ha attecchito. Se è afflosciata, ombreggiala per 2 giorni.');
+ else add(30,`Controlla i germogli di ${cr.name.toLowerCase()}`,'Devono spuntare le prime foglie verdi.');
+ if(cr.support)add(pl.m==='seme'?40:20,`Metti i tutori a ${cr.name.toLowerCase()}`,'Canne piantate vicino al fusto, legate con spago morbido a 8.');
+ if(!cr.perenne){for(let d=21;d<Math.min(hv,150);d+=21)T.push({id:uid(),date:addDays(pl.date,d),title:`Concima: ${pl.contName}`,note:'Concime liquido per orto, alla dose dell’etichetta, sulla terra già umida.',src:'p:'+pl.id,done:false,group:'conc|'+pl.cont+'|'+addDays(pl.date,d)})}
+ else add(30,`Prima cimatura: ${cr.name.toLowerCase()}`,'Taglia le punte per farla infittire.');
+ add(hv,`Inizio raccolta: ${cr.name}`,cr.how);
+ return T;
+}
+function terrTasks(t,date){const T=[];const add=(d,title,note)=>T.push({id:uid(),date:addDays(date,d),title,note,src:'t:'+t.id,done:false});
+ if(t.closed){add(1,`${t.name}: guarda la condensa al mattino`,'Un velo al mattino che sparisce di giorno è perfetto. Vetro sempre appannato: apri 2–4 ore. Mai condensa: spruzza 2–3 volte.');add(7,`${t.name}: controllo della prima settimana`,'Togli foglie marce o ingiallite, verifica che il muschio sia verde.');add(14,`${t.name}: controllo umidità`,'Se l’equilibrio è giusto, da ora lo lasci chiuso.')}
+ else{add(4,`${t.name}: prima annaffiatura`,'Poca acqua alla base delle piante, mai sulle foglie.');add(18,`${t.name}: annaffia se il substrato è asciutto`,'Infila uno stecchino: se esce pulito e asciutto, annaffia.')}
+ [7,14,21,28].forEach(d=>add(d,`${t.name}: ruota di un quarto di giro`,'Così le piante crescono dritte verso la luce.'));
+ add(30,`${t.name}: potatura e pulizia`,'Taglia le foglie che toccano il vetro e pulisci la condensa dall’interno.');
+ add(t.closed?45:30,`${t.name}: controllo dell’acqua`,t.closed?'Se non vedi più condensa al mattino, spruzza 3–4 volte e richiudi.':'Annaffia solo se il substrato è asciutto del tutto.');
+ add(60,`${t.name}: seconda potatura`,'Accorcia le piante più vigorose, rimuovi muffe con un cotton fioc.');
+ return T;
+}
+const WATER={orto:[4,4,3,3,2,1,1,1,2,3,4,4],arom:[8,8,6,5,4,3,2,2,3,5,7,8]};
+function waterInfo(k){if(k.startsWith('t:')){const t=S.terr.saved.find(x=>'t:'+x.id===k);return{int:t&&!t.closed?(CUR_M()>=5&&CUR_M()<=9?14:28):45}}return{int:WATER[k][CUR_M()-1]}}
+let WX=null;
+async function loadWeather(){try{const c=JSON.parse(localStorage.getItem(KEY+'-wx')||'null');if(c&&Date.now()-c.t<3*3600e3&&c.d&&c.d.time){WX=c.d;return}}catch(e){}
+ try{const r=await fetch('https://api.open-meteo.com/v1/forecast?latitude=37.977&longitude=12.964&daily=precipitation_sum,temperature_2m_max,temperature_2m_min,weathercode&past_days=3&forecast_days=5&timezone=Europe%2FRome');if(!r.ok)throw 0;const j=await r.json();if(!j.daily||!j.daily.time)throw 0;WX=j.daily;try{localStorage.setItem(KEY+'-wx',JSON.stringify({t:Date.now(),d:WX}))}catch(e){}if(ui.tab==='oggi'&&ui.oggiSeg==='oggi'&&!ui.sheet)render()}catch(e){WX=false}}
+function wxInfo(){if(!WX)return null;const t=todayISO();const i=WX.time.indexOf(t);if(i<0)return null;const P=WX.precipitation_sum,Mx=WX.temperature_2m_max,Mn=WX.temperature_2m_min;
+ const rainPast=(P[i-1]||0)+(P[i-2]||0)+(P[i]||0);const rainTom=P[i+1]||0;const nx=[i,i+1,i+2,i+3].filter(k=>k<WX.time.length);const minN=Math.min(...nx.map(k=>Mn[k])),maxN=Math.max(...nx.map(k=>Mx[k]));
+ return{i,rainPast,rainTom,minN,maxN,days:[i,i+1,i+2,i+3,i+4].filter(k=>k<WX.time.length).map(k=>({d:WX.time[k],mx:Mx[k],mn:Mn[k],p:P[k],c:WX.weathercode?WX.weathercode[k]:0}))}}
+function wxIcon(c,p){return p>=1||c>=51?'pioggia':c>=3?'nuvoloso':c>=1?'poco nuvoloso':'sereno'}
+
+/* =================== RENDER =================== */
+const TABS=[
+ {k:'oggi',t:'Oggi',ic:'<circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/>'},
+ {k:'orto',t:'Orto',ic:'<path d="M12 21v-8"/><path d="M12 13c0-4 3-6.5 7.5-6.5 0 4.5-3 6.5-7.5 6.5z"/><path d="M12 15c0-3-2.4-5-6-5 0 3.4 2.4 5 6 5z"/><path d="M4 21h16"/>'},
+ {k:'terrario',t:'Terrario',ic:'<path d="M7 4h10"/><path d="M8 4v2.5C5.6 8 4.5 10.3 4.5 13a7.5 7.5 0 0 0 15 0c0-2.7-1.1-5-3.5-6.5V4"/><path d="M6 15.5h12"/><path d="M12 15.5c0-2.5 1.5-4 3.2-4.3M12 15.5c0-2-1.2-3.3-2.8-3.6"/>'},
+ {k:'piante',t:'Piante',ic:'<path d="M5 19c0-8 5.5-14 15-14 0 9.5-6 15-14 15"/><path d="M5 19 13 11"/>'},
+ {k:'spesa',t:'Spesa',ic:'<path d="M4 8h16l-1.5 11a2 2 0 0 1-2 1.7H7.5a2 2 0 0 1-2-1.7z"/><path d="M8.5 8 12 3l3.5 5"/><path d="M9.5 12v5M14.5 12v5"/>'}
+];
+function renderTabs(){$('#tabs').innerHTML=TABS.map(t=>`<button class="tab" data-a="tab" data-k="${t.k}" aria-current="${ui.tab===t.k}"><svg viewBox="0 0 24 24">${t.ic}</svg>${t.t}</button>`).join('')}
+function render(keep=true){const y=window.scrollY;renderTabs();const v=VIEWS[ui.tab];$('#title').textContent=TABS.find(t=>t.k===ui.tab).t;$('#main').innerHTML=v();if(keep)window.scrollTo(0,y)}
+const note=(l,t)=>`<div class="note ${l==='ok'?'good':l}"><b class="ic" aria-hidden="true">${l==='ok'?'✓':l==='bad'?'!':l==='info'?'i':'!'}</b><div>${t}</div></div>`;
+const seg=(name,opts,cur)=>`<div class="seg" role="group">${opts.map(([k,t])=>`<button data-a="seg" data-n="${name}" data-k="${k}" aria-pressed="${cur===k}">${t}</button>`).join('')}</div>`;
+
+/* ---------- OGGI ---------- */
+function vOggi(){
+ let o=seg('oggiSeg',[['oggi','Oggi'],['cal','Calendario'],['diario','Diario']],ui.oggiSeg);
+ if(ui.oggiSeg==='cal')return o+vCal();
+ if(ui.oggiSeg==='diario')return o+vDiario();
+ const t=todayISO();const d=new Date();
+ o+=`<section class="card"><div class="eyebrow">${GIORNI[d.getDay()]} ${d.getDate()} ${MESI[d.getMonth()]}</div><p>${STAGIONE[d.getMonth()]}</p></section>`;
+ // annaffiature
+ const W=wxInfo();
+ if(W){const adv=[];if(W.rainPast>=5)adv.push(['ok',`Negli ultimi giorni sono caduti ${num(W.rainPast,0)} mm di pioggia: i vasi all’aperto oggi non vanno annaffiati.`]);if(W.rainTom>=5)adv.push(['info',`Domani è prevista pioggia (${num(W.rainTom,0)} mm): rimanda annaffiatura e concime.`]);if(W.minN<4)adv.push(['warn',`Notti fredde in arrivo (minima ${num(W.minN,0)} °C): copri insalate e basilico con tessuto non tessuto.`]);if(W.maxN>=30)adv.push(['warn',`Caldo in arrivo (massima ${num(W.maxN,0)} °C): controlla i vasi ogni giorno e annaffia al mattino presto.`]);
+  o+=`<section class="card"><div class="row spread"><h2>Meteo ad Alcamo</h2></div><div class="grid3" style="grid-template-columns:repeat(${W.days.length},1fr);gap:6px">${W.days.map(x=>`<div style="text-align:center;min-width:0"><div class="eyebrow">${x.d===t?'Oggi':GG3[parseISO(x.d).getDay()]}</div><div class="small"><b class="num">${num(x.mx,0)}°</b> <span class="muted num">${num(x.mn,0)}°</span></div><div class="tiny muted">${wxIcon(x.c,x.p)}${x.p>=1?' · '+num(x.p,0)+' mm':''}</div></div>`).join('')}</div>${adv.map(a=>note(a[0],a[1])).join('')}</section>`}
+ const keys=[['orto','Orto'],['arom','Aromatiche'],...S.terr.saved.filter(x=>x.started).map(x=>['t:'+x.id,x.name])];
+ const rows=keys.map(([k,n])=>{const last=S.water[k];const it=waterInfo(k).int;let st;const rained=W&&W.rainPast>=5&&!k.startsWith('t:');
+  if(!last)st=`<span class="pill neutral">Non registrata</span>`;else{const since=diffDays(last,t);const due=it-since;st=due<=0?(rained?`<span class="pill good">Ha piovuto</span>`:`<span class="pill warn">Controlla oggi</span>`):`<span class="pill good">Tra ${due} ${due===1?'giorno':'giorni'}</span>`;}
+  return`<div class="li"><div class="t"><b>${n}</b><div class="tiny muted">${last?`Ultima: ${fmtD(last)} · `:''}${k.startsWith('t:')?`controllo ogni ${it} giorni`:`ogni ${it} giorni circa in ${MESI[CUR_M()-1]}`}</div></div>${st}<button class="btn sm soft" data-a="water" data-k="${k}">Fatto</button></div>`}).join('');
+ o+=`<section class="card"><div class="row spread"><h2>Annaffiature</h2></div><div class="list">${rows}</div><p class="tiny muted">Prima di annaffiare infila un dito nella terra: se i primi 2 cm sono asciutti, annaffia finché l’acqua esce dai fori. Svuota i sottovasi dopo mezz’ora.</p></section>`;
+ // compiti
+ const open=S.tasks.filter(x=>!x.done).sort((a,b)=>a.date.localeCompare(b.date));
+ const dueNow=dedupe(open.filter(x=>x.date<=t));const next=dedupe(open.filter(x=>x.date>t&&x.date<=addDays(t,7)));
+ if(!S.plantings.length&&!S.terr.saved.some(x=>x.started)){
+  o+=`<section class="card"><h2>Da dove iniziare</h2><p class="small muted">L’app contiene già un esempio di orto in cinque vasi e un terrario da 5 litri: modificali come vuoi. Quando avrai seminato o montato, premi “Avvia” e l’app creerà il calendario delle cure.</p><div class="stack"><button class="btn primary block" data-a="tab" data-k="terrario">Progetta il terrario</button><button class="btn soft block" data-a="tab" data-k="orto">Organizza l’orto</button><button class="btn block" data-a="tab" data-k="spesa">Prepara la lista della spesa</button></div></section>`;
+ }else{
+  o+=`<section class="card"><div class="row spread"><h2>Da fare oggi</h2><span class="pill ${dueNow.length?'lemon':'good'}">${dueNow.length||'Niente'}</span></div>${dueNow.length?`<div class="list">${dueNow.map(taskRow).join('')}</div>`:'<p class="small muted">Tutto in ordine per oggi.</p>'}</section>`;
+  o+=`<section class="card"><h2>Prossimi 7 giorni</h2>${next.length?`<div class="list">${next.map(taskRow).join('')}</div>`:'<p class="small muted">Nessun impegno in arrivo.</p>'}</section>`;
+  const nNew=dedupe(S.tasks.filter(x=>!x.done&&!x.exp&&x.date>=t)).length;
+  o+=`<section class="card"><h2>Avvisi sul telefono</h2><p class="small muted">Metti i promemoria nel Calendario dell’iPhone: ti avvisa alle 9 del mattino del giorno giusto, anche se non apri l’app.</p><button class="btn ${nNew?'primary':''}" data-a="ics" ${nNew?'':'disabled'}>${nNew?`Aggiungi ${nNew} promemoria al Calendario`:'Calendario già aggiornato'}</button>${S.tasks.some(x=>x.exp)?'<button class="linkbtn tiny" data-a="icsall">Esporta di nuovo tutti i promemoria</button>':''}</section>`;
+ }
+ const m=CUR_M();const now=CROPS.filter(c=>methods(c).some(k=>c[k].m.includes(m)));
+ o+=`<section class="card"><div class="row"><div class="grow"><h2>Una pianta non sta bene?</h2><p class="small muted">Scegli il sintomo nelle guide o chiedi a Claude con una foto, senza costi.</p></div><button class="btn soft" data-a="guide" data-k="foto">Foto</button></div></section>`;
+ o+=`<section class="card"><h2>Si pianta in ${MESI[m-1]}</h2><div class="chips">${now.map(c=>`<button class="chip" data-a="crop" data-id="${c.id}"><span class="dot" style="background:${c.color}"></span>${esc(c.name)}</button>`).join('')}</div></section>`;
+ return o;
+}
+function dedupe(list){const seen=new Set();return list.filter(x=>{if(!x.group)return true;const k=x.group;if(seen.has(k))return false;seen.add(k);return true})}
+function taskRow(x){const late=x.date<todayISO();return`<div class="li ${x.done?'done':''}"><button class="check" role="checkbox" aria-checked="${!!x.done}" aria-label="Segna come fatto" data-a="task" data-id="${x.id}"></button><div class="t"><b>${esc(x.title)}</b><div class="tiny muted">${late?'<span class="pill warn">In ritardo</span> ':''}${fmtD(x.date)} · ${esc(x.note||'')}</div></div></div>`}
+
+function vCal(){
+ const t=todayISO();if(!ui.calM)ui.calM=t.slice(0,7);
+ const[y,m]=ui.calM.split('-').map(Number);const first=new Date(y,m-1,1);const start=new Date(first);start.setDate(1-((first.getDay()+6)%7));
+ const byDay={};S.tasks.forEach(x=>{(byDay[x.date]=byDay[x.date]||[]).push(x)});
+ let g=['L','M','M','G','V','S','D'].map(d=>`<div class="wd">${d}</div>`).join('');
+ for(let i=0;i<42;i++){const d=new Date(start);d.setDate(start.getDate()+i);const k=iso(d);const n=(byDay[k]||[]).filter(x=>!x.done).length;
+  g+=`<button class="d ${d.getMonth()!==m-1?'out':''} ${k===t?'today':''} ${k===ui.calSel?'sel':''}" data-a="calday" data-k="${k}" aria-label="${d.getDate()} ${MESI[d.getMonth()]}${n?', '+n+' attività':''}">${d.getDate()}${n?'<i></i>':'<i style="visibility:hidden"></i>'}</button>`}
+ const list=dedupe((byDay[ui.calSel]||[]).sort((a,b)=>a.done-b.done));
+ return`<section class="card"><div class="row spread"><button class="btn sm" data-a="calnav" data-k="-1" aria-label="Mese precedente">‹</button><h2>${MESI[m-1].replace(/^./,c=>c.toUpperCase())} ${y}</h2><button class="btn sm" data-a="calnav" data-k="1" aria-label="Mese successivo">›</button></div><div class="cal">${g}</div></section>
+ <section class="card"><h2>${fmtD(ui.calSel).replace(/^./,c=>c.toUpperCase())}</h2>${list.length?`<div class="list">${list.map(taskRow).join('')}</div>`:'<p class="small muted">Nessuna attività in questo giorno.</p>'}<button class="btn sm" data-a="addtask">Aggiungi un promemoria</button></section>`;
+}
+
+function vDiario(){
+ const items=[...S.diario].sort((a,b)=>b.date.localeCompare(a.date));
+ return`<section class="card"><h2>Nuova nota</h2>
+ <label class="f">Data<input type="date" id="dDate" value="${todayISO()}"></label>
+ <label class="f">Cosa avete fatto o notato<textarea id="dText" placeholder="Es. spuntati i primi ravanelli nella Cassetta 1"></textarea></label>
+ <label class="f">Foto (facoltativa)<input type="file" id="dPhoto" accept="image/*"></label>
+ <button class="btn primary" data-a="adddiary">Salva nel diario</button></section>
+ ${items.length?items.map(x=>`<section class="card diary"><div class="row spread"><div class="eyebrow">${fmtD(x.date)}</div><button class="btn sm danger" data-a="deldiary" data-id="${x.id}">Elimina</button></div>${x.photo?`<img src="${x.photo}" alt="Foto del ${fmtD(x.date)}">`:''}<p>${esc(x.text)}</p></section>`).join(''):'<p class="small muted">Il diario è vuoto. Una foto a settimana dello stesso vaso mostra bene come crescono le piante.</p>'}`;
+}
+
+/* ---------- TERRARIO ---------- */
+function vTerr(){
+ let o=seg('terrSeg',[['progetta','Progetta'],['miei',`I miei terrari${S.terr.saved.length?' ('+S.terr.saved.length+')':''}`]],ui.terrSeg);
+ if(ui.terrSeg==='miei')return o+vTerrMiei();
+ const t=S.terr.draft;const plan=terrPlan(t);
+ const last=plan.steps.length-1;ui.stage=clamp(ui.stage,0,last);
+ // anteprima
+ o+=`<section class="card hero-terr"><div class="row spread wrap"><div class="grow"><div class="eyebrow">${SHAPES[t.shape].name} · ${num(plan.G.litri,1)} L · ${t.closed?'chiuso':'aperto'}</div><h2>${esc(t.name)}</h2></div><button class="btn sm" data-a="tname">Rinomina</button></div>
+ ${seg('terrView',[['risultato','Risultato'],['strati','Strati'],['alto','Dall’alto'],['passi','Passi']],ui.terrView)}
+ <div class="scene">${ui.terrView==='alto'?drawTop(t,plan):drawTerr(t,plan,{mode:ui.terrView,stage:ui.stage})}</div>`;
+ if(ui.terrView==='alto')o+=`<div class="list">${plan.species.map((id,i)=>{const p=TP[id];const c=plan.items.filter(x=>x.p.id===id).length;return`<div class="li"><span class="pill neutral">${i+1}</span><div class="t"><b>${esc(p.name)}${c>1?' ×'+c:''}</b><div class="tiny muted">${i===0?'La più alta: al centro o dietro':p.h<=6?'Bassa: in primo piano':'Tra le altre, a 2 cm dal vetro'}</div></div></div>`}).join('')}</div><p class="tiny muted">Usa questa pianta come mappa quando metti a dimora: i numeri sono anche l’ordine in cui piantare.</p>`;
+ if(ui.terrView==='passi'){const st=plan.steps[ui.stage];o+=`<div class="progress" aria-hidden="true"><i style="width:${((ui.stage+1)/plan.steps.length*100).toFixed(0)}%"></i></div><div class="stack"><div class="eyebrow">Passo ${ui.stage+1} di ${plan.steps.length}</div><h3>${esc(st.title)}</h3><p class="small">${esc(st.text)}</p></div><div class="stagebar"><button class="btn" data-a="stage" data-k="-1" ${ui.stage===0?'disabled':''}>Indietro</button><span class="grow"></span><button class="btn primary" data-a="stage" data-k="1" ${ui.stage===last?'disabled':''}>Avanti</button></div>`}
+ else if(ui.terrView==='strati')o+=`<p class="tiny muted">Sezione in scala: spessori e litri sono calcolati sulle misure del tuo contenitore.</p>`;
+ o+=`</section>`;
+ // verifiche
+ o+=`<section class="card"><h2>Verifica del progetto</h2><div class="stack">${plan.checks.map(c=>note(c.l,c.t)).join('')}</div></section>`;
+ // contenitore
+ const dims=SHAPES[t.shape].dims.map(([k,l])=>`<label class="f">${l}<div class="unit"><input type="number" inputmode="decimal" min="3" max="120" step="0.5" id="td_${k}" data-c="tdim" data-k="${k}" value="${t[k]}"><span>cm</span></div></label>`).join('');
+ o+=`<section class="card"><div class="eyebrow">Passo 1</div><h2>Il contenitore</h2>
+ <div class="shape-pick">${Object.entries(SHAPES).map(([k,v])=>`<button data-a="tshape" data-k="${k}" aria-pressed="${t.shape===k}">${shapeIcon(k)}${v.name}</button>`).join('')}</div>
+ <div class="grid3">${dims}</div>
+ <p class="tiny muted">Misura l’interno del vetro con un metro da sarta. Volume: <b class="num">${num(plan.G.litri,1)} L</b>.</p>
+ <label class="switch"><span><b>Terrario chiuso</b><br><span class="tiny muted">Con coperchio, per piante che amano l’umidità. Spento: aperto, per piante grasse.</span></span><input type="checkbox" id="tclosed" data-c="tclosed" ${t.closed?'checked':''}></label></section>`;
+ // piante
+ const avail=TPLANTS.filter(p=>t.closed?p.env!=='aperto':p.env!=='chiuso');
+ o+=`<section class="card"><div class="eyebrow">Passo 2</div><h2>Le piante</h2><p class="small muted">${t.closed?'Piante da sottobosco che amano l’umidità.':'Piante grasse e succulente: vogliono aria e luce.'} Ne entrano bene circa ${Math.max(1,Math.round(plan.G.area(plan.S)*.75/(Math.PI*9)))} di taglia media.</p>
+ <div>${avail.map(p=>{const n=t.plants[p.id]||0;return`<div class="plantrow"><div class="pic">${plantPic(p)}</div><div class="t"><b>${esc(p.name)}</b><span class="tiny muted">${p.h} cm · ${esc(p.light)}</span><br><button class="linkbtn tiny" data-a="tplant" data-id="${p.id}">Scheda</button></div><div class="stepper"><button data-a="tcount" data-id="${p.id}" data-k="-1" aria-label="Togli ${esc(p.name)}">−</button><b>${n}</b><button data-a="tcount" data-id="${p.id}" data-k="1" aria-label="Aggiungi ${esc(p.name)}">+</button></div></div>`}).join('')}</div></section>`;
+ // opzioni
+ o+=`<section class="card"><div class="eyebrow">Passo 3</div><h2>Strati e decorazioni</h2>
+ <label class="f">Materiale del drenaggio<select id="tdrain" data-c="tdrain">${Object.entries(DRAINS).map(([k,v])=>`<option value="${k}" ${t.drain===k?'selected':''}>${v.name}</option>`).join('')}</select></label>
+ ${[['rete','Rete tra drenaggio e terra','Tiene separati gli strati, consigliata.'],['collina','Collinetta al centro','La terra più alta al centro dà profondità.']].map(([k,a,b])=>`<label class="switch"><span><b>${a}</b><br><span class="tiny muted">${b}</span></span><input type="checkbox" id="to_${k}" data-c="topt" data-k="${k}" ${t[k]?'checked':''}></label>`).join('')}
+ ${[['legno','Legnetto'],['sassi','Sassi di fiume'],['ghiaietto','Sentiero di ghiaietto bianco']].map(([k,a])=>`<label class="switch"><span><b>${a}</b></span><input type="checkbox" id="tdec_${k}" data-c="tdec" data-k="${k}" ${t.decor[k]?'checked':''}></label>`).join('')}
+ </section>`;
+ // materiali
+ o+=`<section class="card"><h2>Cosa serve per questo terrario</h2><p class="small muted">Quantità calcolate sulle misure del tuo vetro.</p>${['Terrario','Piante per terrario','Attrezzi'].map(g=>{const it=plan.mats.filter(m=>m.g===g);return it.length?`<div class="eyebrow">${g==='Terrario'?'Contenitore e strati':g}</div><div class="list">${it.map(m=>`<div class="li"><div class="t"><b>${esc(m.t)}</b><div class="tiny">${esc(m.q)}</div>${m.w?`<div class="tiny muted">Dove: ${esc(m.w)}</div>`:''}</div></div>`).join('')}</div>`:''}).join('')}
+ <button class="btn primary" data-a="terr2spesa">Crea la lista della spesa di questo terrario</button></section>`;
+ // istruzioni
+ o+=`<section class="card"><h2>Istruzioni complete</h2><ol class="steps">${plan.steps.map((s,i)=>`<li><div><b>${esc(s.title)}</b><p class="small">${esc(s.text)}</p><button class="linkbtn tiny" data-a="gostage" data-k="${i}">Vedi il disegno di questo passo</button></div></li>`).join('')}</ol></section>`;
+ // cura
+ o+=`<section class="card"><h2>Cura nel tempo</h2><ul class="bul small">${t.closed?`<li>Acqua: una spruzzata ogni 1–2 mesi, solo se al mattino non vedi più condensa.</li><li>Luce: ${esc(plan.lights.join(' / ')||'indiretta')}. Mai sole diretto: il vetro fa effetto serra.</li><li>Ogni settimana gira il vaso di un quarto.</li><li>Ogni mese: pota le foglie che toccano il vetro e togli quelle secche.</li><li>Non serve concime.</li>`:`<li>Acqua: solo quando il substrato è asciutto del tutto, ogni 2–3 settimane d’estate e una volta al mese d’inverno.</li><li>Luce: vicino a una finestra luminosa, anche con sole del mattino.</li><li>Ogni settimana gira il vaso di un quarto.</li><li>Concime per cactacee diluito a metà, una volta in primavera.</li>`}</ul></section>`;
+ o+=`<section class="card"><div class="stack"><button class="btn primary block" data-a="tsave">Salva tra i miei terrari</button><button class="btn soft block" data-a="tstart">L’ho montato oggi: crea il calendario delle cure</button><button class="btn block" data-a="tnew">Nuovo progetto da zero</button></div></section>`;
+ return o;
+}
+function vTerrMiei(){
+ if(!S.terr.saved.length)return`<section class="card"><h2>Nessun terrario salvato</h2><p class="small muted">Progetta un terrario e premi “Salva tra i miei terrari”: lo ritrovi qui con disegno, materiali e istruzioni.</p><button class="btn primary" data-a="seg" data-n="terrSeg" data-k="progetta">Progetta</button></section>`;
+ return`<div class="thumbs">${S.terr.saved.map(t=>{const p=terrPlan(t);return`<section class="card"><div class="scene">${drawTerr(t,p,{thumb:true})}</div><div><b>${esc(t.name)}</b><div class="tiny muted">${SHAPES[t.shape].name} · ${num(p.G.litri,1)} L · ${p.items.length} piante</div>${t.started?`<div class="tiny"><span class="pill good">Montato ${fmtD(t.started)}</span></div>`:''}</div><div class="row wrap"><button class="btn sm soft" data-a="topen" data-id="${t.id}">Apri</button><button class="btn sm" data-a="tspesa" data-id="${t.id}">Spesa</button><button class="btn sm danger" data-a="tdel" data-id="${t.id}">Elimina</button></div></section>`}).join('')}</div>`;
+}
+
+/* ---------- ORTO ---------- */
+function vOrto(){
+ const conts=S.orto.containers;let o='';
+ const active=S.plantings;
+ if(active.length){const t=todayISO();
+  o+=`<section class="card"><h2>In crescita</h2><div class="list">${active.map(pl=>{const cr=CROP[pl.crop];const hv=cr.hv[pl.m]||60;const d=diffDays(pl.date,t);const pct=clamp(d/hv,0,1);
+   return`<div class="li"><span class="dot" style="background:${cr.color}"></span><div class="t"><b>${esc(cr.name)}</b> <span class="tiny muted">· ${esc(pl.contName)} · ${pl.count} ${pl.m==='seme'?'semine':pl.m==='bulbo'?'spicchi':'piantine'}</span><div class="progress" style="margin-top:6px"><i style="width:${(pct*100).toFixed(0)}%"></i></div><div class="tiny muted">${d<0?'Parte il '+fmtD(pl.date):`Giorno ${d} · raccolta ${d>=hv?'<b>da ora</b>':'dal '+fmtD(addDays(pl.date,hv))}`}</div></div><button class="btn sm" data-a="delplant" data-id="${pl.id}" aria-label="Rimuovi">×</button></div>`}).join('')}</div></section>`;
+ }
+ const totSoil=conts.reduce((a,c)=>a+contGeom(c).soilL,0);const totPlants=conts.reduce((a,c)=>a+ortoLayout(c).zones.reduce((b,z)=>b+z.pts.length,0),0);
+ o+=`<section class="card"><div class="grid3"><div><div class="eyebrow">Vasi</div><div class="big-num">${conts.length}</div></div><div><div class="eyebrow">Piante</div><div class="big-num">${totPlants}</div></div><div><div class="eyebrow">Terriccio</div><div class="big-num">${num(totSoil,0)}<span class="small"> L</span></div></div></div>
+ <div class="stack"><button class="btn primary block" data-a="ostart">Abbiamo seminato: avvia il calendario</button><button class="btn soft block" data-a="orto2spesa">Crea la lista della spesa dell’orto</button></div></section>`;
+ conts.forEach(c=>{const g=contGeom(c);const{svg,lay}=drawOrto(c);const ch=ortoChecks(c);const bad=ch.filter(x=>x.l!=='ok');
+  o+=`<section class="card"><div class="row spread"><div class="grow"><h2>${esc(c.name)}</h2><div class="tiny muted">${g.dimTxt} · ${num(g.soilL,0)} L di terriccio</div></div><button class="btn sm" data-a="cedit" data-id="${c.id}">Modifica</button></div>
+  <div class="scene">${svg}</div>
+  <div class="list">${lay.zones.map(z=>`<div class="li"><span class="dot" style="background:${z.cr.color}"></span><div class="t"><b>${esc(z.cr.name)}</b> <span class="tiny muted">· ${methodName(z.cr,z.cz.m)}</span><div class="tiny muted">${z.pts.length} ${z.cz.m==='seme'?(z.pts.length===1?'pianta':'piante')+(z.cr.seme.spaglio?' (semina fitta a file, poi dirada)':' (2–3 semi per punto)'):z.cz.m==='bulbo'?(z.pts.length===1?'spicchio':'spicchi'):(z.pts.length===1?'piantina':'piantine')} · ogni ${z.cr.sp} cm</div></div><button class="linkbtn small" data-a="crop" data-id="${z.cr.id}">Come fare</button></div>`).join('')}</div>
+  ${bad.length?`<div class="stack">${bad.map(x=>note(x.l,x.t)).join('')}</div>`:''}${ch.filter(x=>x.l==='ok').map(x=>note('ok',x.t)).join('')}</section>`});
+ o+=`<button class="btn block" data-a="cadd">Aggiungi un vaso</button>`;
+ o+=`<section class="card"><h2>Preparare i vasi</h2><ol class="steps"><li><div>Metti i vasi dove prendono almeno 5–6 ore di sole, rialzati di 2–3 cm sui sottovasi o su piedini.</div></li><li><div>Versa sul fondo 3 cm di argilla espansa (2 cm nei vasi bassi).</div></li><li><div>In una bacinella mescola il terriccio con l’humus: 1 parte ogni 10. Per le aromatiche aggiungi un terzo di sabbia o lapillo.</div></li><li><div>Riempi fino a 2–3 cm dal bordo senza pressare.</div></li><li><div>Annaffia a fondo e aspetta un’ora prima di seminare o trapiantare.</div></li></ol><button class="btn sm soft" data-a="guide" data-k="orto">Manuale completo dell’orto</button></section>`;
+ return o;
+}
+
+function editSheet(){
+ const c=ui.edit;const g=contGeom(c);const{svg}=drawOrto(c,300);const ch=ortoChecks(c);
+ const m=CUR_M();const used=new Set(c.crops.map(x=>x.id));
+ const opts=CROPS.filter(x=>!used.has(x.id));const nowO=opts.filter(x=>methods(x).some(k=>x[k].m.includes(m))),later=opts.filter(x=>!nowO.includes(x));
+ const dimF=(k,l)=>`<label class="f">${l}<div class="unit"><input type="number" inputmode="decimal" min="5" max="300" id="ce_${k}" data-c="ce" data-k="${k}" value="${c[k]}"><span>cm</span></div></label>`;
+ return`<label class="f">Nome<input type="text" id="ce_name" data-c="ce" data-k="name" value="${esc(c.name)}"></label>
+ <div class="chips">${[['cassetta','Cassetta'],['tondo','Vaso tondo'],['quadrato','Vaso quadrato'],['fioriera','Fioriera grande']].map(([k,t])=>`<button class="chip" data-a="cetype" data-k="${k}" aria-pressed="${c.type===k}">${t}</button>`).join('')}</div>
+ <div class="grid3">${c.type==='tondo'?dimF('d','Diametro'):dimF('l','Lunghezza')}${c.type==='cassetta'||c.type==='fioriera'?dimF('w','Larghezza'):''}${dimF('h','Profondità')}</div>
+ <p class="tiny muted">${g.dimTxt} · ${num(g.totL,0)} L in tutto · ${num(g.soilL,0)} L di terriccio · ${num(g.drainL,1)} L di argilla espansa</p>
+ <div class="scene">${svg}</div>
+ <h3>Colture</h3>
+ ${c.crops.map((cz,i)=>{const cr=CROP[cz.id];return`<div class="card" style="padding:12px;gap:8px"><div class="row"><span class="dot" style="background:${cr.color}"></span><b class="grow">${esc(cr.name)}</b><button class="btn sm danger" data-a="cecropdel" data-i="${i}">Togli</button></div>
+  <div class="grid2"><label class="f">Come<select id="cem_${i}" data-c="cecrop" data-i="${i}" data-k="m">${methods(cr).map(k=>`<option value="${k}" ${cz.m===k?'selected':''}>${methodName(cr,k)}</option>`).join('')}</select></label>
+  <label class="f">Spazio: ${Math.round(cz.share/c.crops.reduce((a,x)=>a+(+x.share),0)*100)}%<input type="range" min="10" max="100" step="5" id="ces_${i}" data-c="cecrop" data-i="${i}" data-k="share" value="${cz.share}"></label></div></div>`}).join('')}
+ <label class="f">Aggiungi una coltura<select id="ce_add" data-c="ceadd"><option value="">Scegli…</option><optgroup label="Si pianta in ${MESI[m-1]}">${nowO.map(x=>`<option value="${x.id}">${esc(x.name)}</option>`).join('')}</optgroup><optgroup label="Altri mesi">${later.map(x=>`<option value="${x.id}">${esc(x.name)}</option>`).join('')}</optgroup></select></label>
+ ${ch.length?`<div class="stack">${ch.map(x=>note(x.l,x.t)).join('')}</div>`:''}
+ <div class="stack"><button class="btn primary block" data-a="cesave">Salva</button>${S.orto.containers.some(x=>x.id===c.id)?'<button class="btn danger block" data-a="cedel">Elimina questo vaso</button>':''}</div>`;
+}
+
+/* ---------- PIANTE E GUIDE ---------- */
+function vPiante(){
+ let o=seg('plantSeg',[['orto','Orto'],['arom','Aromatiche'],['terr','Terrario'],['guide','Guide']],ui.plantSeg);
+ if(ui.plantSeg==='guide')return o+vGuide();
+ o+=`<input type="text" id="psearch" data-c="search" placeholder="Cerca una pianta" value="${esc(ui.search)}" aria-label="Cerca una pianta">`;
+ const q=ui.search.trim().toLowerCase();const m=CUR_M();
+ if(ui.plantSeg==='terr'){const list=TPLANTS.filter(p=>!q||p.name.toLowerCase().includes(q));
+  o+=`<section class="card"><h2>Terrario chiuso</h2><div>${list.filter(p=>p.env!=='aperto').map(tRow).join('')||'<p class="small muted">Nessun risultato.</p>'}</div></section><section class="card"><h2>Terrario aperto</h2><div>${list.filter(p=>p.env!=='chiuso').map(tRow).join('')||'<p class="small muted">Nessun risultato.</p>'}</div></section>`;return o}
+ o+=`<div class="chips"><button class="chip" data-a="onlynow" aria-pressed="${ui.onlyNow}">Solo quelle di ${MESI[m-1]}</button></div>`;
+ const list=CROPS.filter(c=>(ui.plantSeg==='arom'?c.cat==='aromatica':c.cat!=='aromatica')&&(!q||c.name.toLowerCase().includes(q))&&(!ui.onlyNow||methods(c).some(k=>c[k].m.includes(m))));
+ o+=`<section class="card"><div class="list">${list.map(c=>{const ok=methods(c).filter(k=>c[k].m.includes(m));return`<button class="li" style="border-left:0;border-right:0;border-bottom:0;background:none;text-align:left;cursor:pointer;width:100%" data-a="crop" data-id="${c.id}"><span class="dot" style="background:${c.color};width:16px;height:16px"></span><span class="t"><b>${esc(c.name)}</b><br><span class="tiny muted">${methods(c).map(k=>methodName(c,k)).join(' · ')} · ogni ${c.sp} cm · vaso ≥ ${c.minH} cm</span></span>${ok.length?`<span class="pill good">Adesso</span>`:''}</button>`}).join('')||'<p class="small muted">Nessun risultato.</p>'}</div></section>`;
+ return o;
+}
+function tRow(p){return`<div class="plantrow"><div class="pic">${plantPic(p)}</div><div class="t"><b>${esc(p.name)}</b><span class="tiny muted"><i>${esc(p.latin)}</i> · ${p.h} cm · ${p.env==='chiuso'?'chiuso':p.env==='aperto'?'aperto':'chiuso o aperto'}</span></div><button class="btn sm soft" data-a="tplant" data-id="${p.id}">Scheda</button></div>`}
+
+function cropSheet(id){
+ const c=CROP[id];const m=CUR_M();
+ const strip=(lab,k,cls)=>c[k]?`<span class="small">${lab}</span>${[...Array(12)].map((_,i)=>`<i class="${c[k].m.includes(i+1)?cls:''}" title="${MESI[i]}"></i>`).join('')}`:'';
+ const months=`<div class="months"><span></span>${MESI3.map((x,i)=>`<span class="h ${i+1===m?'cur':''}">${x[0].toUpperCase()}</span>`).join('')}${strip('Seme','seme','s')}${strip('Piantina','piantina','p')}${strip('Bulbo','bulbo','p')}</div>`;
+ let steps='';
+ if(c.seme){const sm=c.seme;steps+=`<h3>${sm.semenzaio?'Da seme, in semenzaio':'Da seme, direttamente nel vaso'}</h3><ol class="steps">${(sm.semenzaio?[
+  `Riempi un semenzaio alveolato con terriccio da semina e inumidiscilo.`,
+  `Metti 2 semi per alveolo a ${num(sm.d)} cm di profondità e copri con poco terriccio.`,
+  `Tienilo in un posto luminoso e riparato, a 18–25 °C. Nebulizza per mantenere umido: germina in ${sm.g[0]}–${sm.g[1]} giorni.`,
+  `Lascia la piantina più forte per alveolo.`,
+  `Dopo 30–40 giorni, quando ha 4–6 foglie vere, trapiantala nel vaso a ${c.sp} cm di distanza.`,
+  `Da qui segui i passaggi “Da piantina”.`]:[
+  `Prepara il vaso: argilla espansa sul fondo, terriccio con humus, annaffia e lascia assestare.`,
+  sm.spaglio?`Traccia file distanti 10 cm, profonde ${num(sm.d)} cm. Distribuisci i semi sottili lungo la fila, mescolati a un pizzico di sabbia.`:`Fai buche o solchi profondi ${num(sm.d)} cm ogni ${c.sp} cm. Metti ${['fave','piselli','fagiolino','zucchina'].includes(c.id)?'1–2 semi':'2–3 semi'} per punto.`,
+  `Copri con terriccio fine e premi con il palmo della mano.`,
+  `Annaffia con la doccetta, piano, per non spostare i semi. Metti un’etichetta con nome e data.`,
+  `Tieni la superficie sempre umida finché germinano: ${sm.g[0]}–${sm.g[1]} giorni.`,
+  ['fave','piselli','fagiolino','zucchina'].includes(c.id)?`Se in un punto sono nate due piantine, lascia la più forte.`:`Quando hanno 2–3 foglie vere, dirada: lascia una piantina ogni ${c.sp} cm.`,
+  `Dalla terza settimana concima ogni 3 settimane con concime liquido.`,
+  `Raccolta dopo circa ${c.hv.seme} giorni. ${c.how}`]).map(x=>`<li><div class="small">${x}</div></li>`).join('')}</ol>`}
+ if(c.piantina){steps+=`<h3>Da piantina</h3><ol class="steps">${[
+  `Scegli piantine compatte, verde intenso, senza fiori e con radici bianche.`,
+  `Annaffiale nel loro vasetto un’ora prima.`,
+  `Scava una buca grande quanto il pane di terra, ogni ${c.sp} cm.`,
+  `Estrai la piantina tenendola per il pane di terra, mai per il fusto. ${c.plantNote||'Interrala alla stessa altezza in cui stava nel vasetto.'}`,
+  `Compatta la terra attorno con le dita e annaffia subito.`,
+  `I primi 3–5 giorni, se c’è sole forte, ombreggia nelle ore calde.`,
+  c.support?`Dopo 2–3 settimane metti un tutore e lega il fusto con spago morbido.`:`Dalla terza settimana concima ogni 3 settimane${c.perenne?' (le aromatiche ne vogliono poco: 2–3 volte l’anno)':''}.`,
+  `Raccolta dopo circa ${c.hv.piantina} giorni. ${c.how}`].map(x=>`<li><div class="small">${x}</div></li>`).join('')}</ol>`}
+ if(c.bulbo){steps+=`<h3>Da spicchi</h3><ol class="steps">${[
+  `Separa gli spicchi della testa poco prima di piantarli; scarta quelli piccoli o molli.`,
+  `Pianta ogni spicchio con la punta in su, ${num(c.bulbo.d)} cm sotto terra, ogni ${c.sp} cm.`,
+  `Annaffia una volta, poi pochissimo: l’aglio teme i ristagni.`,
+  `In circa 30 giorni spuntano le foglie.`,
+  `Togli le erbacce e, se fa lo stelo fiorale, taglialo.`,
+  `Raccolta a maggio–giugno. ${c.how}`].map(x=>`<li><div class="small">${x}</div></li>`).join('')}</ol>`}
+ const names=ids=>ids.map(x=>CROP[x]?CROP[x].name:x).join(', ')||'—';
+ return`<div class="row"><span class="dot" style="background:${c.color};width:22px;height:22px"></span><div class="grow"><i class="muted">${esc(c.latin)}</i></div>${methods(c).some(k=>c[k].m.includes(m))?'<span class="pill good">Si pianta adesso</span>':'<span class="pill neutral">Non in questo mese</span>'}</div>
+ <div class="grid2"><div><div class="eyebrow">Luce</div><div class="small">${esc(c.sun)}</div></div><div><div class="eyebrow">Acqua</div><div class="small">${esc(c.water)}</div></div><div><div class="eyebrow">Distanza</div><div class="small">${c.sp} cm</div></div><div><div class="eyebrow">Vaso</div><div class="small">profondo almeno ${c.minH} cm</div></div></div>
+ <div class="stack"><div class="eyebrow">Calendario ad Alcamo</div>${months}<div class="row tiny muted"><span class="dot" style="background:var(--accent)"></span>seme <span class="dot" style="background:var(--lemon)"></span>piantina o bulbo</div></div>
+ <div class="stack">${steps}</div>
+ <div class="stack"><h3>Raccolta</h3><p class="small">${esc(c.how)}</p></div>
+ ${c.tips.length?`<div class="stack"><h3>Consigli</h3><ul class="bul small">${c.tips.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`:''}
+ ${c.probs.length?`<div class="stack"><h3>Problemi frequenti</h3><ul class="bul small">${c.probs.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`:''}
+ <div class="grid2"><div><div class="eyebrow">Sta bene con</div><div class="small">${names(c.friends)}</div></div><div><div class="eyebrow">Tieni lontano da</div><div class="small">${names(c.avoid)}</div></div></div>
+ <label class="f">Aggiungi a un vaso<select id="addto" data-c="addto" data-id="${c.id}"><option value="">Scegli il vaso…</option>${S.orto.containers.map(x=>`<option value="${x.id}">${esc(x.name)}</option>`).join('')}<option value="__new">Nuovo vaso</option></select></label>`;
+}
+function tplantSheet(id){const p=TP[id];return`<div class="scene"><svg viewBox="0 0 160 140" width="160" height="140" aria-hidden="true"><rect x="0" y="118" width="160" height="22" fill="#4A3324"/>${drawPlant(p,80,120,Math.min(110/(p.h+2),130/(p.w+2)),rng(hashStr(p.id)))}</svg></div>
+ <p><i class="muted">${esc(p.latin)}</i></p><p>${esc(p.desc)}</p>
+ <div class="grid2"><div><div class="eyebrow">Altezza</div><div class="small">${p.h} cm · larga ${p.w} cm</div></div><div><div class="eyebrow">Terrario</div><div class="small">${p.env==='chiuso'?'Chiuso':p.env==='aperto'?'Aperto':'Chiuso o aperto'}</div></div><div><div class="eyebrow">Luce</div><div class="small">${esc(p.light)}</div></div><div><div class="eyebrow">Umidità</div><div class="small">${esc(p.hum)}</div></div></div>
+ <div class="stack"><h3>Cura</h3><p class="small">${esc(p.care)}</p></div>
+ <div class="stack"><div class="eyebrow">Dove trovarla</div><div class="small">In vasetto da 6–8 cm, nei vivai o nei negozi di terrariofilia.</div></div>
+ ${(S.terr.draft.closed?p.env!=='aperto':p.env!=='chiuso')?`<button class="btn primary" data-a="tcount" data-id="${p.id}" data-k="1" data-close="1">Aggiungi al terrario</button>`:`<p class="small muted">Non adatta al terrario ${S.terr.draft.closed?'chiuso':'aperto'} che stai progettando.</p>`}`}
+
+const GUIDES={
+ orto:{t:'Manuale dell’orto in vaso',b:`<h3>Dove</h3><p class="small">Almeno 5–6 ore di sole diretto. In autunno e inverno ad Alcamo il sole basso è prezioso: usa il lato più luminoso del balcone. D’estate le insalate vogliono mezz’ombra.</p>
+ <h3>Contenitori</h3><ul class="bul small"><li>Insalate, rucola, ravanelli: profondità 15–20 cm.</li><li>Spinaci, bietole, finocchi, aglio: 20–25 cm.</li><li>Cavoli, fave, carote, pomodori: 30–40 cm.</li><li>Sempre con fori sul fondo e un sottovaso da svuotare.</li></ul>
+ <h3>Annaffiare</h3><ul class="bul small"><li>Infila un dito: se i primi 2 cm sono asciutti, annaffia.</li><li>Annaffia al mattino, alla base, fino a vedere l’acqua uscire dai fori.</li><li>Ottobre–novembre: 2–3 volte a settimana. Dicembre–febbraio: 1–2. Estate: ogni giorno.</li><li>L’acqua ferma nel sottovaso fa marcire le radici: svuotalo dopo mezz’ora.</li></ul>
+ <h3>Concimare</h3><p class="small">Dalla terza settimana, concime liquido per orto ogni 3–4 settimane, alla dose dell’etichetta, sulla terra già umida. Le aromatiche ne vogliono pochissimo.</p>
+ <h3>Semina a scalare</h3><p class="small">Per ravanelli, rucola e insalate semina poco ogni 2–3 settimane: avrai raccolto continuo invece che tutto insieme.</p>
+ <h3>Freddo</h3><p class="small">Ad Alcamo raramente serve. Se le previsioni danno meno di 3 °C, copri le insalate di notte con tessuto non tessuto.</p>
+ <h3>Dopo il raccolto</h3><p class="small">Smuovi la terra, togli le radici vecchie, aggiungi 2 manciate di humus e risemina. Non ripetere la stessa famiglia nello stesso vaso: dopo i cavoli metti legumi o insalate.</p>`},
+ terr:{t:'Manuale del terrario',b:`<h3>Come funziona</h3><p class="small">In un terrario chiuso l’acqua evapora dalla terra e dalle foglie, si condensa sul vetro e ricade. Bastano pochissime annaffiature all’anno se l’equilibrio è giusto.</p>
+ <h3>Gli strati, dal basso</h3><ol class="steps"><li><div class="small"><b>Drenaggio</b> (lapillo, ghiaia o argilla espansa): 2–5 cm, raccoglie l’acqua in eccesso.</div></li><li><div class="small"><b>Rete</b> facoltativa: separa la terra dai sassi.</div></li><li><div class="small"><b>Carbone attivo</b>: un velo di 0,5–1 cm contro muffe e odori.</div></li><li><div class="small"><b>Terriccio</b>: 4–9 cm, più alto dietro o al centro.</div></li><li><div class="small"><b>Piante, muschio e decorazioni</b>.</div></li></ol>
+ <p class="small">In totale gli strati sotto le piante occupano circa un quarto o un terzo dell’altezza del vaso.</p>
+ <h3>Leggere la condensa</h3><ul class="bul small"><li>Velo al mattino che sparisce di giorno: perfetto.</li><li>Vetro appannato tutto il giorno: troppa acqua, apri 2–4 ore.</li><li>Mai condensa e muschio che schiarisce: troppo secco, spruzza.</li></ul>
+ <h3>Luce</h3><p class="small">Tanta luce ma mai sole diretto: dietro il vetro diventa una serra e cuoce le piante. Ottimo a 1–2 metri da una finestra luminosa.</p>
+ <h3>Terrario aperto con piante grasse</h3><p class="small">Substrato per cactacee mescolato a lapillo, bocca larga, sole o luce molto intensa. Acqua solo quando il substrato è asciutto del tutto.</p>`},
+ diag:{t:'Cosa succede alle mie piante?',b:''},
+ gloss:{t:'Parole dell’orto',b:`<dl class="stack small">${[['Diradare','Togliere le piantine in eccesso per lasciare spazio a quelle rimaste.'],['Colletto','Il punto dove il fusto incontra le radici.'],['Pane di terra','La zolla di terra attaccata alle radici della piantina.'],['Semina a file','Semi messi lungo un solco dritto.'],['Semina a spaglio','Semi sparsi sulla superficie, poi coperti.'],['Semina a scalare','Seminare poco alla volta ogni 2–3 settimane.'],['Semenzaio','Contenitore ad alveoli dove nascono le piantine prima del trapianto.'],['Rincalzare','Accumulare terra alla base della pianta.'],['Cimare','Tagliare la punta di un fusto perché la pianta si infittisca.'],['Pacciamatura','Coprire la terra con paglia o corteccia: trattiene l’umidità.'],['Consociazione','Coltivare vicine piante che si aiutano a vicenda.'],['Tessuto non tessuto','Telo leggero che protegge dal freddo lasciando passare luce e aria.'],['Carbone attivo','Carbone poroso che assorbe impurità; nel terrario limita muffe e odori.'],['Drenaggio','Strato di materiale grossolano che fa defluire l’acqua.']].map(([a,b])=>`<div><dt><b>${a}</b></dt><dd style="margin:2px 0 0">${b}</dd></div>`).join('')}</dl>`}
+};
+const DIAG={orto:[
+ ['I semi non spuntano dopo 2 settimane','Terra troppo secca o semi troppo profondi.','Risemina più in superficie e tieni sempre umido.'],
+ ['Piantine lunghe, sottili e pallide','Poca luce.','Sposta il vaso in un punto più soleggiato.'],
+ ['Foglie gialle in basso','Troppa acqua o poco concime.','Annaffia meno spesso e dai concime liquido.'],
+ ['Piante afflosciate con terra bagnata','Ristagno: le radici marciscono.','Svuota i sottovasi e controlla che i fori siano liberi.'],
+ ['Foglie bucate o rosicchiate','Lumache dopo la pioggia o bruchi.','Controlla la sera e toglili a mano. Cenere o gusci d’uovo tritati attorno alle piante.'],
+ ['Insetti verdi o neri sotto le foglie','Afidi, frequenti su fave e cavoli.','Spruzza acqua e sapone di Marsiglia (10 g per litro). Ripeti dopo 3–4 giorni.'],
+ ['Ravanelli con tante foglie e niente radice','Troppo vicini, troppa ombra o troppo concime.','Dirada a 5 cm, più sole, niente concime.'],
+ ['Lattuga che fa il fusto e i fiori','Caldo o fine ciclo.','Raccoglila subito: dopo diventa amara.'],
+ ['Polvere bianca sulle foglie','Oidio, un fungo.','Togli le foglie colpite, annaffia solo alla base, dai più aria.'],
+ ['Muffa bianca sulla terra','Umidità costante e poca aria.','Smuovi la superficie e annaffia meno.']],
+ terr:[
+ ['Vetro sempre appannato','Troppa acqua.','Apri il coperchio 2–4 ore al giorno finché si vede di nuovo attraverso il vetro.'],
+ ['Mai condensa, muschio biancastro','Troppo secco.','Spruzza 3–4 volte e richiudi.'],
+ ['Muffa bianca filamentosa','Umidità alta e materiale organico in decomposizione.','Togli la parte colpita con un cotton fioc, apri un giorno, annaffia meno.'],
+ ['Pianta che marcisce alla base','Troppa acqua o pianta non adatta.','Rimuovila e sostituiscila; controlla di aver scelto piante da terrario chiuso.'],
+ ['Piante che si allungano verso il vetro','Poca luce.','Spostalo in un punto più luminoso e giralo ogni settimana.'],
+ ['Foglie bruciate o accartocciate','Sole diretto: effetto serra.','Spostalo lontano dal sole diretto.'],
+ ['Moscerini','Arrivati con il terriccio.','Tieni aperto un giorno: la superficie deve asciugare. Una trappola gialla adesiva aiuta.'],
+ ['Muschio che ingiallisce','Troppa luce o troppo secco.','Meno luce diretta, una spruzzata d’acqua.']]};
+function vGuide(){
+ return`<section class="card"><h2>Guide</h2><div class="list">${[['foto','Diagnosi da foto','Gratis con l’app Claude: prepari la richiesta e alleghi la foto'],['orto','Manuale dell’orto in vaso','Posizione, annaffiature, concime, freddo'],['terr','Manuale del terrario','Strati, condensa, luce, terrario aperto'],['diag','Diagnosi dei problemi','Scegli cosa vedi, trovi la causa e il rimedio'],['gloss','Parole dell’orto','Diradare, colletto, semenzaio e altre']].map(([k,a,b])=>`<button class="li" style="border-left:0;border-right:0;border-bottom:0;background:none;text-align:left;cursor:pointer;width:100%" data-a="guide" data-k="${k}"><span class="t"><b>${a}</b><br><span class="tiny muted">${b}</span></span><span aria-hidden="true">›</span></button>`).join('')}</div></section>`;
+}
+function diagBody(){const k=ui.diagK||'orto';return`<button class="btn primary block" data-a="guide" data-k="foto">Non trovi il sintomo? Fai una foto</button>`+`${`<div class="seg">${[['orto','Orto'],['terr','Terrario']].map(([a,b])=>`<button data-a="diagk" data-k="${a}" aria-pressed="${k===a}">${b}</button>`).join('')}</div>`}<div class="stack">${DIAG[k].map(([s,c,r],i)=>`<details class="card" style="padding:12px" ${ui.diagOpen===k+i?'open':''}><summary style="cursor:pointer;font-weight:700">${esc(s)}</summary><p class="small" style="margin-top:8px"><b>Causa:</b> ${esc(c)}</p><p class="small"><b>Cosa fare:</b> ${esc(r)}</p></details>`).join('')}</div>`}
+
+/* ---------- SPESA ---------- */
+const GROUPS=['Contenitori','Terra e substrati','Semi e bulbi','Piantine','Terrario','Piante per terrario','Attrezzi','Altro'];
+function srcLabel(x){return x.srcName||(x.src==='orto'?'Orto':x.src==='tools'?'Attrezzi di base':x.src==='m'?'Aggiunti a mano':'Altro')}
+function itemRow(x){return`<div class="li ${x.done?'done':''}"><button class="check" role="checkbox" aria-checked="${!!x.done}" aria-label="Comprato" data-a="scheck" data-id="${x.id}"></button><div class="t"><b>${esc(x.t)}</b>${x.q?`<div class="tiny">${esc(x.q)}</div>`:''}${x.w?`<div class="tiny muted">Dove: ${esc(x.w)}</div>`:''}</div><button class="btn sm" data-a="sdel" data-id="${x.id}" aria-label="Rimuovi">×</button></div>`}
+function vSpesa(){
+ const L=S.spesa;let o='';const open=L.filter(x=>!x.done).length;const srcs=[...new Set(L.map(x=>x.src))];
+ o+=`<section class="card"><div class="grid2"><div><div class="eyebrow">Da comprare</div><div class="big-num">${open}<span class="small muted"> / ${L.length}</span></div></div><div><div class="eyebrow">Liste</div><div class="big-num">${srcs.length}</div></div></div>
+ <p class="small muted">Ogni progetto ha la sua lista, con quantità calcolate e dove comprare. Rigenerarla mantiene le spunte.</p>
+ <div class="grid2"><button class="btn soft" data-a="orto2spesa">Lista dell’orto</button><button class="btn soft" data-a="terr2spesa">Lista del terrario</button></div>${S.terr.saved.filter(t=>t.id!==S.terr.draft.id).length?`<label class="f">Lista di un terrario salvato<select id="spt" data-c="spt"><option value="">Scegli…</option>${S.terr.saved.filter(t=>t.id!==S.terr.draft.id).map(t=>`<option value="${t.id}">${esc(t.name)}</option>`).join('')}</select></label>`:''}<button class="btn sm" data-a="tools2spesa">Attrezzi di base</button></section>`;
+ o+=`<section class="card"><h2>Aggiungi a mano</h2><div class="row"><input type="text" id="sNew" placeholder="Es. vaso per la menta" aria-label="Nuovo articolo"><button class="btn primary" data-a="saddm">Aggiungi</button></div></section>`;
+ if(!L.length)o+=`<section class="card"><p class="small muted">Nessuna lista ancora. Premi “Lista del terrario” o “Lista dell’orto”: l’app calcola tutto quello che serve dai tuoi progetti.</p></section>`;
+ srcs.forEach(src=>{const it=L.filter(x=>x.src===src);const left=it.filter(x=>!x.done).length;
+  o+=`<section class="card"><div class="row spread"><div class="grow"><h2>${esc(srcLabel(it[0]))}</h2><div class="tiny muted">${left?left+' da comprare':'Tutto comprato'} · ${it.length} articoli</div></div><button class="btn sm" data-a="scopy" data-src="${esc(src)}">Copia</button></div>`;
+  GROUPS.forEach(g=>{const gi=it.filter(x=>x.g===g);if(!gi.length)return;o+=`<div class="eyebrow">${g==='Terrario'?'Contenitore e strati':g}</div><div class="list">${gi.map(itemRow).join('')}</div>`});
+  o+=`<button class="btn sm danger" data-a="sdelsrc" data-src="${esc(src)}">Elimina questa lista</button></section>`});
+ if(L.length)o+=`<section class="card"><div class="stack"><button class="btn block" data-a="scopy">Copia tutte le liste (per WhatsApp o Note)</button><button class="btn block" data-a="sclean">Togli gli articoli comprati</button><button class="btn danger block" data-a="sclear">Svuota tutto</button></div></section>`;
+ return o;
+}
+function addToSpesa(items,src,srcName){const old=S.spesa.filter(x=>x.src===src);const keep=S.spesa.filter(x=>x.src!==src);const n=items.map(m=>{const prev=old.find(x=>x.t===m.t);return{id:uid(),g:m.g,t:m.t,q:m.q,w:m.w||whereFor(m),done:prev?prev.done:false,src,srcName}});S.spesa=[...keep,...n];save();return n.length}
+
+const VIEWS={oggi:vOggi,orto:vOrto,terrario:vTerr,piante:vPiante,spesa:vSpesa};
+
+/* =================== FOGLIO, AVVISI =================== */
+function openSheet(title,bodyFn){ui.sheet={title,bodyFn};ui.sheetAnim=true;drawSheet();ui.sheetAnim=false;$('#overlay').hidden=false;document.body.style.overflow='hidden'}
+function drawSheet(){if(!ui.sheet)return;const sb=document.querySelector('.sheet-b');const y=sb?sb.scrollTop:0;$('#overlay').innerHTML=`<div class="sheet${ui.sheetAnim?' anim':''}" role="dialog" aria-modal="true" aria-label="${esc(ui.sheet.title)}"><div class="sheet-h"><h2>${esc(ui.sheet.title)}</h2><button class="iconbtn" data-a="close" aria-label="Chiudi"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div><div class="sheet-b">${ui.sheet.bodyFn()}</div></div>`;const nb=document.querySelector('.sheet-b');if(nb)nb.scrollTop=y}
+function closeSheet(){ui.sheet=null;ui.edit=null;$('#overlay').hidden=true;$('#overlay').innerHTML='';document.body.style.overflow=''}
+let tT;function toast(m){const t=$('#toast');t.textContent=m;t.hidden=false;clearTimeout(tT);tT=setTimeout(()=>t.hidden=true,2400)}
+function confirmSheet(title,text,okLabel,fn){openSheet(title,()=>`<p>${text}</p><div class="stack"><button class="btn danger block" data-a="okconfirm">${okLabel}</button><button class="btn block" data-a="close">Annulla</button></div>`);ui.confirmFn=fn}
+
+/* =================== AZIONI =================== */
+const A={
+ tab:el=>{ui.tab=el.dataset.k;try{localStorage.setItem(KEY+'-tab',ui.tab)}catch(e){}closeSheet();render(false);window.scrollTo(0,0)},
+ seg:el=>{ui[el.dataset.n]=el.dataset.k;if(el.dataset.n==='terrView'&&el.dataset.k==='passi')ui.stage=0;render()},
+ close:()=>closeSheet(),
+ okconfirm:()=>{const f=ui.confirmFn;ui.confirmFn=null;closeSheet();f&&f()},
+ settings:()=>openSheet('Impostazioni',settingsBody),
+ water:el=>{S.water[el.dataset.k]=todayISO();save();render();toast('Annaffiatura registrata')},
+ task:el=>{const x=S.tasks.find(t=>t.id===el.dataset.id);if(!x)return;const nv=!x.done;if(x.group)S.tasks.filter(t=>t.group===x.group).forEach(t=>t.done=nv);else x.done=nv;save();render();if(ui.sheet)drawSheet()},
+ calday:el=>{ui.calSel=el.dataset.k;render()},
+ calnav:el=>{const[y,m]=ui.calM.split('-').map(Number);const d=new Date(y,m-1+(+el.dataset.k),1);ui.calM=iso(d).slice(0,7);render()},
+ addtask:()=>openSheet('Nuovo promemoria',()=>`<label class="f">Data<input type="date" id="ntDate" value="${ui.calSel}"></label><label class="f">Cosa fare<input type="text" id="ntText" placeholder="Es. comprare le piantine di lattuga"></label><button class="btn primary" data-a="savetask">Salva</button>`),
+ savetask:()=>{const t=$('#ntText').value.trim();if(!t){toast('Scrivi cosa fare');return}S.tasks.push({id:uid(),date:$('#ntDate').value||todayISO(),title:t,note:'Promemoria',src:'m',done:false});save();closeSheet();render();toast('Promemoria salvato')},
+ adddiary:async()=>{const text=$('#dText').value.trim();const f=$('#dPhoto').files[0];if(!text&&!f){toast('Scrivi una nota o scegli una foto');return}let photo=null;if(f){try{photo=await resizeImg(f)}catch(e){toast('Non riesco a leggere questa foto')}}S.diario.push({id:uid(),date:$('#dDate').value||todayISO(),text,photo});save();render();toast('Salvato nel diario')},
+ deldiary:el=>confirmSheet('Eliminare la nota?','La nota e la sua foto verranno cancellate.','Elimina',()=>{S.diario=S.diario.filter(x=>x.id!==el.dataset.id);save();render()}),
+ // terrario
+ tshape:el=>{S.terr.draft.shape=el.dataset.k;save();render()},
+ tcount:el=>{const t=S.terr.draft;const id=el.dataset.id;t.plants[id]=clamp((t.plants[id]||0)+(+el.dataset.k),0,9);if(!t.plants[id])delete t.plants[id];save();if(el.dataset.close){closeSheet();toast(`${TP[id].name} aggiunta`)}render()},
+ tplant:el=>openSheet(TP[el.dataset.id].name,()=>tplantSheet(el.dataset.id)),
+ stage:el=>{ui.stage+=+el.dataset.k;render()},
+ gostage:el=>{ui.terrView='passi';ui.stage=+el.dataset.k;render(false);window.scrollTo({top:0,behavior:'smooth'})},
+ tname:()=>openSheet('Nome del terrario',()=>`<label class="f">Nome<input type="text" id="tn" value="${esc(S.terr.draft.name)}"></label><button class="btn primary" data-a="tnameok">Salva</button>`),
+ tnameok:()=>{S.terr.draft.name=$('#tn').value.trim()||'Terrario';save();closeSheet();render()},
+ terr2spesa:()=>{const t=S.terr.draft;const n=addToSpesa(terrPlan(t).mats,'terr:'+t.id,'Terrario: '+t.name);render();toast(`Lista di “${t.name}” pronta: ${n} articoli`)},
+ tspesa:el=>{const t=S.terr.saved.find(x=>x.id===el.dataset.id);const n=addToSpesa(terrPlan(t).mats,'terr:'+t.id,'Terrario: '+t.name);ui.tab='spesa';render(false);window.scrollTo(0,0);toast(`Lista di “${t.name}” pronta: ${n} articoli`)},
+ sdelsrc:el=>{const src=el.dataset.src;confirmSheet('Eliminare questa lista?','Gli articoli di questa lista verranno tolti.','Elimina',()=>{S.spesa=S.spesa.filter(x=>x.src!==src);save();render()})},
+ tsave:()=>{const t=JSON.parse(JSON.stringify(S.terr.draft));const i=S.terr.saved.findIndex(x=>x.id===t.id);if(i>=0)S.terr.saved[i]=t;else S.terr.saved.push(t);save();render();toast('Terrario salvato')},
+ tstart:()=>openSheet('Terrario montato',()=>`<p class="small">L’app crea i promemoria: controllo della condensa, rotazione settimanale, potature e controllo dell’acqua.</p><label class="f">Data di montaggio<input type="date" id="tsd" value="${todayISO()}"></label><button class="btn primary" data-a="tstartok">Crea il calendario</button>`),
+ tstartok:()=>{const d=$('#tsd').value||todayISO();const t=S.terr.draft;t.started=d;const c=JSON.parse(JSON.stringify(t));const i=S.terr.saved.findIndex(x=>x.id===t.id);if(i>=0)S.terr.saved[i]=c;else S.terr.saved.push(c);S.tasks=S.tasks.filter(x=>x.src!=='t:'+t.id).concat(terrTasks(t,d));S.water['t:'+t.id]=d;S.example=false;save();closeSheet();render();toast('Calendario creato: lo trovi in Oggi')},
+ tnew:()=>confirmSheet('Nuovo progetto','Il progetto attuale, se non l’hai salvato, verrà sostituito.','Inizia da zero',()=>{const t=defaultTerr();t.name='Nuovo terrario';t.plants={};t.decor={sassi:false,legno:false,ghiaietto:false};S.terr.draft=t;ui.terrView='risultato';save();render()}),
+ topen:el=>{const t=S.terr.saved.find(x=>x.id===el.dataset.id);S.terr.draft=JSON.parse(JSON.stringify(t));ui.terrSeg='progetta';ui.terrView='risultato';save();render(false);window.scrollTo(0,0)},
+ tdel:el=>confirmSheet('Eliminare il terrario?','Verranno tolti anche i suoi promemoria.','Elimina',()=>{const id=el.dataset.id;S.terr.saved=S.terr.saved.filter(x=>x.id!==id);S.tasks=S.tasks.filter(x=>x.src!=='t:'+id);save();render()}),
+ // orto
+ cedit:el=>{ui.edit=JSON.parse(JSON.stringify(S.orto.containers.find(c=>c.id===el.dataset.id)));openSheet('Modifica vaso',editSheet)},
+ cadd:()=>{ui.edit={id:'c'+uid(),name:'Nuovo vaso',type:'tondo',l:40,w:30,h:30,d:35,crops:[]};openSheet('Nuovo vaso',editSheet)},
+ cetype:el=>{ui.edit.type=el.dataset.k;drawSheet()},
+ cecropdel:el=>{ui.edit.crops.splice(+el.dataset.i,1);drawSheet()},
+ cesave:()=>{const c=ui.edit;const i=S.orto.containers.findIndex(x=>x.id===c.id);if(i>=0)S.orto.containers[i]=c;else S.orto.containers.push(c);save();closeSheet();render();toast('Vaso salvato')},
+ cedel:()=>{const id=ui.edit.id;confirmSheet('Eliminare il vaso?','Il vaso e le sue colture spariranno dal progetto.','Elimina',()=>{S.orto.containers=S.orto.containers.filter(x=>x.id!==id);save();render()})},
+ orto2spesa:()=>{const n=addToSpesa(ortoMats(S.orto.containers),'orto','Orto');render();toast(`Lista dell’orto pronta: ${n} articoli`)},
+ ostart:()=>openSheet('Avvia il calendario',ostartBody),
+ ostartok:()=>{const d=$('#osd').value||todayISO();let n=0;S.orto.containers.forEach(c=>{const lay=ortoLayout(c);lay.zones.forEach((z,i)=>{const cb=document.getElementById(`os_${c.id}_${i}`);if(!cb||!cb.checked)return;const pl={id:uid(),crop:z.cr.id,m:z.cz.m,cont:c.id,contName:c.name,date:d,count:z.pts.length};S.plantings.push(pl);S.tasks.push(...cropTasks(pl));n++})});S.water.orto=d;S.water.arom=d;S.example=false;save();closeSheet();ui.tab='oggi';ui.oggiSeg='oggi';render(false);window.scrollTo(0,0);toast(`${n} colture avviate: ecco le cose da fare`)},
+ delplant:el=>confirmSheet('Togliere questa coltura?','Verranno tolti anche i suoi promemoria.','Togli',()=>{const id=el.dataset.id;S.plantings=S.plantings.filter(x=>x.id!==id);S.tasks=S.tasks.filter(x=>x.src!=='p:'+id);save();render()}),
+ crop:el=>openSheet(CROP[el.dataset.id].name,()=>cropSheet(el.dataset.id)),
+ onlynow:()=>{ui.onlyNow=!ui.onlyNow;render()},
+ guide:el=>{if(el.dataset.k==='foto'){ui.ai={ctx:'orto',plant:'',note:'',img:null};openSheet('Diagnosi da foto',aiBody);return}const g=GUIDES[el.dataset.k];ui.diagK=ui.diagK||'orto';openSheet(g.t,()=>el.dataset.k==='diag'?diagBody():g.b)},
+ diagk:el=>{ui.diagK=el.dataset.k;drawSheet()},
+ // spesa
+ scheck:el=>{const x=S.spesa.find(i=>i.id===el.dataset.id);x.done=!x.done;save();render()},
+ sdel:el=>{S.spesa=S.spesa.filter(i=>i.id!==el.dataset.id);save();render()},
+ saddm:()=>{const v=$('#sNew').value.trim();if(!v)return;S.spesa.push({id:uid(),g:'Altro',t:v,q:'',p:null,done:false,src:'m'});save();render();toast('Aggiunto')},
+ tools2spesa:()=>{const n=addToSpesa(BASE_TOOLS,'tools','Attrezzi di base');render();toast(`${n} attrezzi nella lista`)},
+ sclean:()=>{S.spesa=S.spesa.filter(x=>!x.done);save();render()},
+ sclear:()=>confirmSheet('Svuotare la lista?','Tutti gli articoli verranno tolti.','Svuota',()=>{S.spesa=[];save();render()}),
+ scopy:el=>{const only=el.dataset.src;const srcs=[...new Set(S.spesa.map(x=>x.src))].filter(x=>!only||x===only);let txt='Lista della spesa — Serra di Casa\n';srcs.forEach(src=>{const it=S.spesa.filter(x=>x.src===src&&!x.done);if(!it.length)return;txt+=`\n*${srcLabel(it[0])}*\n`;GROUPS.forEach(g=>{const gi=it.filter(x=>x.g===g);if(gi.length)txt+=gi.map(x=>`- ${x.t}${x.q?' — '+x.q:''}`).join('\n')+'\n'})});copyText(txt)},
+ ics:()=>exportICS(false),
+ aictx:el=>{ui.ai.ctx=el.dataset.k;ui.ai.plant='';drawSheet()},
+ aisave:()=>{const ans=($('#aians')||{}).value||'';const a=ui.ai;const pl=a.plant?(a.ctx==='terr'?TP[a.plant].name:CROP[a.plant].name):'';const txt=`Diagnosi${pl?' — '+pl:''}: ${a.note||''}${ans?'\nRimedio: '+ans:''}`.trim();if(!a.img&&!ans&&!a.note){toast('Aggiungi una foto o una nota');return}S.diario.push({id:uid(),date:todayISO(),text:txt,photo:a.img});save();closeSheet();render();toast('Salvato nel diario')},
+ icsall:()=>exportICS(true),
+ sharedata:async()=>{const json=JSON.stringify(S);const f=new File([json],'serra-di-casa-dati.json',{type:'application/json'});try{if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:'Dati di Serra di Casa'});return}}catch(e){if(e&&e.name==='AbortError')return}downloadBlob(f,'serra-di-casa-dati.json')},
+ // impostazioni
+ backup:()=>{copyText(JSON.stringify(S))},
+ restore:()=>{try{importData(JSON.parse($('#imp').value))}catch(e){toast('Il testo incollato non è un backup valido')}},
+ resetex:()=>confirmSheet('Ripristinare l’esempio?','Progetti, lista della spesa, calendario e diario verranno sostituiti dall’esempio iniziale.','Ripristina',()=>{S=defaultState();save();render()})
+};
+function icsEsc(s){return String(s).replace(/\\/g,'\\\\').replace(/;/g,'\\;').replace(/,/g,'\\,').replace(/\n/g,'\\n')}
+function fold(l){const out=[];while(l.length>72){out.push(l.slice(0,72));l=' '+l.slice(72)}out.push(l);return out.join('\r\n')}
+function exportICS(all){const t=todayISO();const list=dedupe(S.tasks.filter(x=>!x.done&&x.date>=t&&(all||!x.exp)).sort((a,b)=>a.date.localeCompare(b.date)));if(!list.length){toast('Nessun promemoria da esportare');return}
+ const stamp=new Date().toISOString().replace(/[-:]/g,'').split('.')[0]+'Z';const L=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Serra di Casa//IT','CALSCALE:GREGORIAN','METHOD:PUBLISH','X-WR-CALNAME:Serra di Casa'];
+ list.forEach(x=>{L.push('BEGIN:VEVENT','UID:'+x.id+'@serradicasa','DTSTAMP:'+stamp,'DTSTART;VALUE=DATE:'+x.date.replace(/-/g,''),'DTEND;VALUE=DATE:'+addDays(x.date,1).replace(/-/g,''),fold('SUMMARY:'+icsEsc(x.title)),fold('DESCRIPTION:'+icsEsc(x.note||'')),'TRANSP:TRANSPARENT','BEGIN:VALARM','ACTION:DISPLAY',fold('DESCRIPTION:'+icsEsc(x.title)),'TRIGGER;RELATED=START:PT9H','END:VALARM','END:VEVENT')});
+ L.push('END:VCALENDAR');const blob=new Blob([L.join('\r\n')+'\r\n'],{type:'text/calendar;charset=utf-8'});
+ const groups=new Set(list.map(x=>x.group).filter(Boolean));S.tasks.forEach(x=>{if(list.includes(x)||(x.group&&groups.has(x.group)))x.exp=true});save();
+ downloadBlob(blob,'serra-di-casa-promemoria.ics');toast(`${list.length} promemoria: conferma “Aggiungi tutti” nel Calendario`);render()}
+function downloadBlob(blob,name){try{const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(u);a.remove()},4000)}catch(e){toast('Non riesco a creare il file qui: apri l’app dalla schermata Home')}}
+function copyText(txt){const done=()=>toast('Copiato');try{navigator.clipboard.writeText(txt).then(done,()=>showCopy(txt))}catch(e){showCopy(txt)}}
+function showCopy(txt){openSheet('Copia il testo',()=>`<p class="small muted">Tieni premuto sul testo, scegli “Seleziona tutto” e poi “Copia”.</p><textarea id="cpy" style="min-height:240px" readonly>${esc(txt)}</textarea>`);setTimeout(()=>{const t=$('#cpy');if(t){t.focus();t.select()}},50)}
+function ostartBody(){const conts=S.orto.containers;return`<p class="small">Scegli la data in cui avete seminato o trapiantato e le colture da avviare. L’app calcola germinazione, diradamento, concimazioni e raccolta.</p><label class="f">Data<input type="date" id="osd" value="${todayISO()}"></label>
+ ${conts.map(c=>{const lay=ortoLayout(c);return`<div class="card" style="padding:12px;gap:6px"><b>${esc(c.name)}</b>${lay.zones.map((z,i)=>{const already=S.plantings.some(p=>p.cont===c.id&&p.crop===z.cr.id);return`<label class="switch"><span>${esc(z.cr.name)} <span class="tiny muted">· ${methodName(z.cr,z.cz.m).toLowerCase()} · ${z.pts.length}${already?' · già avviata':''}</span></span><input type="checkbox" id="os_${c.id}_${i}" ${already||!z.pts.length?'':'checked'}></label>`}).join('')||'<span class="tiny muted">Nessuna coltura</span>'}</div>`}).join('')}
+ <button class="btn primary" data-a="ostartok">Avvia</button>`}
+function importData(d){if(!d||d.v!==1||!d.terr||!d.orto)throw 0;confirmSheet('Sostituire i dati?','Progetti, calendario, spesa e diario di questo telefono verranno sostituiti con quelli del file.','Sostituisci',()=>{S=migrate(d);save();render();toast('Dati importati')})}
+/* ---------- DIAGNOSI DA FOTO (gratuita, tramite l'app Claude) ---------- */
+function aiPrompt(){const a=ui.ai;const ta=$('#ainote');if(ta)a.note=ta.value;const t=S.terr.draft;
+ const plantName=a.plant?(a.ctx==='terr'?TP[a.plant].name+' ('+TP[a.plant].latin+')':CROP[a.plant].name+' ('+CROP[a.plant].latin+')'):'non so di preciso';
+ const ctx=a.ctx==='terr'?`terrario ${t.closed?'chiuso con coperchio (umidità alta)':'aperto con piante grasse'}, tenuto in casa`:'orto in vaso all’aperto, su balcone o terrazzo';
+ return`Ti allego la foto di una mia pianta che non sta bene. Fammi da agronomo esperto.
+- Pianta: ${plantName}
+- Dove: ${ctx}, ad Alcamo (Trapani, Sicilia)
+- Mese: ${MESI[CUR_M()-1]}
+- Cosa ho notato: ${a.note||'vedi la foto'}
+
+Dimmi in modo semplice e pratico:
+1. Che problema ha e quanto sei sicuro
+2. Le cause probabili
+3. Cosa fare adesso, passo per passo, solo con rimedi casalinghi o ammessi nel biologico
+4. Cosa evitare
+5. Quando devo preoccuparmi
+Se dalla foto non si capisce, dimmi che foto devo scattare.`}
+function aiBody(){const a=ui.ai;const plants=a.ctx==='terr'?TPLANTS.map(p=>[p.id,p.name]):CROPS.map(c=>[c.id,c.name]);
+ return`<p class="small">Gratis, con l’app Claude che usi già: qui prepari la richiesta con tutti i dettagli, poi in Claude incolli il testo e alleghi la foto.</p>
+ <div class="seg">${[['orto','Orto'],['terr','Terrario']].map(([k,t])=>`<button data-a="aictx" data-k="${k}" aria-pressed="${a.ctx===k}">${t}</button>`).join('')}</div>
+ <label class="f">Quale pianta è<select id="aiplant" data-c="aiplant"><option value="">Non lo so / un’altra</option>${plants.map(([id,n])=>`<option value="${id}" ${a.plant===id?'selected':''}>${esc(n)}</option>`).join('')}</select></label>
+ <label class="f">Cosa hai notato<textarea id="ainote" data-c="ainote" placeholder="Es. da tre giorni le foglie basse ingialliscono, ha piovuto molto">${esc(a.note)}</textarea></label>
+ <ol class="steps"><li><div class="small">Scatta la foto da vicino, con luce naturale, mostrando bene le foglie colpite (anche il rovescio).</div></li><li><div class="small">Premi il pulsante qui sotto: la richiesta viene copiata e si apre Claude.</div></li><li><div class="small">In Claude tieni premuto nel campo di testo, scegli <b>Incolla</b>, allega la foto con il <b>+</b> e invia.</div></li></ol>
+ <a class="btn primary block" id="askclaude" href="https://claude.ai/new" target="_blank" rel="noopener">Copia la richiesta e apri Claude</a>
+ <details class="card" style="padding:12px"><summary style="cursor:pointer;font-weight:700">Vedi il testo della richiesta</summary><p class="small" style="white-space:pre-wrap;margin-top:8px">${esc(aiPrompt())}</p></details>
+ <div class="stack"><h3>Salva nel diario</h3><p class="small muted">Annota la foto e cosa ti ha risposto Claude, così ritrovi tutto.</p><label class="f">Foto<input type="file" id="aiimg" accept="image/*" data-c="aiimg"></label>${a.img?`<img src="${a.img}" alt="Foto della pianta" style="width:100%;border-radius:12px;max-height:260px;object-fit:cover">`:''}<label class="f">Risposta o rimedio da ricordare<textarea id="aians" placeholder="Es. afidi: acqua e sapone di Marsiglia, ripetere dopo 3 giorni"></textarea></label><button class="btn soft" data-a="aisave">Salva nel diario</button></div>`}
+function settingsBody(){return`<section class="stack"><h3>Usarla in due</h3><p class="small muted">Ognuno installa l’app sul proprio iPhone. Per passare progetti, calendario e spesa all’altro telefono: “Invia i miei dati” (WhatsApp, AirDrop o Mail), poi sull’altro telefono “Carica dati da file”.</p><button class="btn primary" data-a="sharedata">Invia i miei dati</button><label class="f">Carica dati da file<input type="file" id="impf" accept=".json,application/json" data-c="impf"></label></section>
+ `+`<section class="stack"><h3>Installare l’app sull’iPhone</h3><ol class="steps"><li><div class="small">Apri il link dell’app in Safari.</div></li><li><div class="small">Tocca il pulsante Condividi (il quadrato con la freccia).</div></li><li><div class="small">Scegli “Aggiungi alla schermata Home” e conferma.</div></li></ol><p class="tiny muted">I dati restano salvati su questo telefono, nel browser. Per averli su un altro telefono (per esempio quello di tua moglie) usa il backup qui sotto.</p></section>
+ <section class="stack"><h3>Backup</h3><button class="btn" data-a="backup">Copia il backup</button><label class="f">Ripristina: incolla qui un backup<textarea id="imp" placeholder="Incolla il testo del backup"></textarea></label><button class="btn soft" data-a="restore">Ripristina dal backup</button></section>
+ <section class="stack"><h3>Ricomincia</h3><button class="btn danger" data-a="resetex">Ripristina l’esempio iniziale</button></section>`}
+
+function resizeImg(file,max){return new Promise((res,rej)=>{const r=new FileReader();r.onerror=rej;r.onload=()=>{const img=new Image();img.onerror=rej;img.onload=()=>{const m=max||900,k=Math.min(1,m/Math.max(img.width,img.height));const c=document.createElement('canvas');c.width=Math.round(img.width*k);c.height=Math.round(img.height*k);c.getContext('2d').drawImage(img,0,0,c.width,c.height);res(c.toDataURL('image/jpeg',.72))};img.src=r.result};r.readAsDataURL(file)})}
+
+/* change */
+const C={
+ tdim:el=>{const v=parseFloat(String(el.value).replace(',','.'));if(!(v>0)){render();return}S.terr.draft[el.dataset.k]=clamp(v,3,150);save();render()},
+ tclosed:el=>{const t=S.terr.draft;t.closed=el.checked;let rm=0;Object.keys(t.plants).forEach(id=>{const p=TP[id];if(!p)return;if((t.closed&&p.env==='aperto')||(!t.closed&&p.env==='chiuso')){delete t.plants[id];rm++}});save();render();if(rm)toast(`Tolte ${rm} piante non adatte al terrario ${t.closed?'chiuso':'aperto'}`)},
+ tdrain:el=>{S.terr.draft.drain=el.value;save();render()},
+ topt:el=>{S.terr.draft[el.dataset.k]=el.checked;save();render()},
+ tdec:el=>{S.terr.draft.decor[el.dataset.k]=el.checked;save();render()},
+ ce:el=>{const k=el.dataset.k;if(k==='name')ui.edit.name=el.value;else{const v=parseFloat(String(el.value).replace(',','.'));if(v>0)ui.edit[k]=clamp(v,5,300)}drawSheet()},
+ cecrop:el=>{const cz=ui.edit.crops[+el.dataset.i];cz[el.dataset.k]=el.dataset.k==='share'?+el.value:el.value;drawSheet()},
+ ceadd:el=>{const id=el.value;if(!id)return;const cr=CROP[id];const m=CUR_M();const best=methods(cr).find(k=>k===cr.rec&&cr[k].m.includes(m))||methods(cr).find(k=>cr[k].m.includes(m))||cr.rec;const avg=ui.edit.crops.length?Math.round(ui.edit.crops.reduce((a,x)=>a+(+x.share),0)/ui.edit.crops.length):100;ui.edit.crops.push({id,m:best,share:avg});drawSheet()},
+ aiplant:el=>{ui.ai.plant=el.value;drawSheet()},
+ ainote:el=>{ui.ai.note=el.value},
+ aiimg:async el=>{const f=el.files[0];if(!f)return;const ans=($('#aians')||{}).value||'';try{ui.ai.img=await resizeImg(f,900)}catch(e){toast('Non riesco a leggere questa foto')}drawSheet();const t=$('#aians');if(t)t.value=ans},
+ impf:el=>{const f=el.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{importData(JSON.parse(r.result))}catch(e){toast('Questo file non è un backup di Serra di Casa')}};r.readAsText(f)},
+ spt:el=>{if(el.value)A.tspesa({dataset:{id:el.value}})},
+ search:el=>{ui.search=el.value;render();const s=$('#psearch');if(s){s.focus();s.setSelectionRange(s.value.length,s.value.length)}},
+ addto:el=>{const v=el.value;if(!v)return;const id=el.dataset.id;const cr=CROP[id];const m=CUR_M();const best=methods(cr).find(k=>k===cr.rec&&cr[k].m.includes(m))||methods(cr).find(k=>cr[k].m.includes(m))||cr.rec;
+  if(v==='__new'){ui.edit={id:'c'+uid(),name:cr.name,type:'tondo',l:40,w:30,h:Math.max(30,cr.minH),d:Math.max(30,cr.sp+10),crops:[{id,m:best,share:100}]};openSheet('Nuovo vaso',editSheet);return}
+  const c=S.orto.containers.find(x=>x.id===v);ui.edit=JSON.parse(JSON.stringify(c));if(!ui.edit.crops.some(x=>x.id===id)){const avg=ui.edit.crops.length?Math.round(ui.edit.crops.reduce((a,x)=>a+(+x.share),0)/ui.edit.crops.length):100;ui.edit.crops.push({id,m:best,share:avg})}openSheet('Modifica vaso',editSheet)}
+};
+
+document.addEventListener('click',e=>{const el=e.target.closest('[data-a]');if(!el)return;if(el.tagName==='SUMMARY')return;const f=A[el.dataset.a];if(f){e.preventDefault();f(el,e)}});
+document.addEventListener('change',e=>{const el=e.target.closest('[data-c]');if(!el||el.dataset.c==='search')return;const f=C[el.dataset.c];if(f)f(el)});
+let sT;document.addEventListener('input',e=>{const el=e.target;if(el.dataset&&el.dataset.c==='search'){clearTimeout(sT);sT=setTimeout(()=>C.search(el),250)}});
+document.addEventListener('click',e=>{const a=e.target.closest('#askclaude');if(!a)return;const txt=aiPrompt();try{navigator.clipboard.writeText(txt).then(()=>toast('Richiesta copiata: incollala in Claude e allega la foto'),()=>{})}catch(err){}});
+$('#overlay').addEventListener('click',e=>{if(e.target.id==='overlay')closeSheet()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&ui.sheet)closeSheet()});
+render(false);
+loadWeather();
+try{if('serviceWorker' in navigator&&location.protocol==='https:'&&!/claude\.(ai|site)|claudeusercontent/.test(location.hostname))navigator.serviceWorker.register('sw.js').catch(()=>{})}catch(e){}
+</script>
+
+</body></html>

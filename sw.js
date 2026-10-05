@@ -1,6 +1,6 @@
 /* Serra di Casa — service worker: l'app funziona anche senza rete.
    Cambia VERSION a ogni aggiornamento per forzare il nuovo contenuto. */
-const VERSION = 'serra-2026-10-05-spesa-progetto';
+const VERSION = 'serra-2026-10-05-ricerca-piante';
 const CORE = ['./', './index.html', './manifest.webmanifest',
   './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png'];
 

@@ -99,8 +99,9 @@ main{max-width:680px;margin:0 auto;padding-inline:16px;padding-block:14px calc(9
 .pill.lemon{background:var(--lemon-soft);color:var(--warn)}
 .dot{width:12px;height:12px;border-radius:50%;flex:none;border:1px solid rgba(0,0,0,.12)}
 label.f{display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:700;color:var(--muted);min-width:0}
-input[type=number],input[type=text],input[type=date],select,textarea{width:100%;border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:10px 11px;font-size:16px;min-height:44px;color:var(--fg);font-weight:400}
+input[type=number],input[type=text],input[type=search],input[type=date],select,textarea{width:100%;border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:10px 11px;font-size:16px;min-height:44px;color:var(--fg);font-weight:400}
 textarea{min-height:90px;resize:vertical}
+input[type=search]{-webkit-appearance:none;appearance:none}
 input[type=range]{width:100%;accent-color:var(--accent)}
 .unit{position:relative}
 .unit input{padding-right:38px}
@@ -1141,13 +1142,22 @@ function vTerr(){
  // piante
  const avail=TPLANTS.filter(p=>t.closed?p.env!=='aperto':p.env!=='chiuso');
  const FG={tutte:()=>true,alte:p=>p.role==='focale',medie:p=>p.role==='medio',basse:p=>p.role==='basso'||p.role==='copertura',ricadenti:p=>['ricadente','rampicante','aerea'].includes(p.role)};
- const shown=avail.filter(FG[ui.tFilter||'tutte']).filter(p=>!ui.tEasy||p.diff==='facile').filter(p=>!ui.tRep||p.rep==='facile');
+ const tq=(ui.tSearch||'').trim().toLowerCase();
+ const shown=avail.filter(p=>!tq||p.name.toLowerCase().includes(tq)||p.latin.toLowerCase().includes(tq)).filter(FG[ui.tFilter||'tutte']).filter(p=>!ui.tEasy||p.diff==='facile').filter(p=>!ui.tRep||p.rep==='facile');
  const chosen=Object.entries(t.plants).filter(([id,n])=>TP[id]&&n>0);
- o+=`<section class="card"><div class="eyebrow">Passo 2</div><h2>Le piante</h2><p class="small muted">${avail.length} piante adatte al terrario ${t.closed?'chiuso':'aperto'}. Ne entrano bene circa ${Math.max(1,Math.round(plan.G.area(plan.S)*.75/(Math.PI*9)))} di taglia media.</p>
- <div class="row wrap"><button class="btn primary" data-a="tsuggest">${chosen.length?'Proponi un’altra composizione':'Suggeriscimi le piante'}</button>${chosen.length?'<button class="btn sm" data-a="tclear">Svuota</button>':''}</div>
+ const isSaved=S.terr.saved.some(x=>x.id===t.id);const compact=isSaved&&chosen.length&&!ui.tCatalog;
+ const pRow=p=>{const n=t.plants[p.id]||0;return`<div class="plantrow"><div class="pic">${plantPic(p)}</div><div class="t"><b>${esc(p.name)}</b><span class="tiny muted">${p.h} cm · ${ROLE_NAME[p.role]}</span><br><span class="pill ${p.diff==='facile'?'good':p.diff==='media'?'lemon':'bad'}" style="font-size:11px">cura ${p.diff}</span> <span class="pill neutral" style="font-size:11px">${p.rep==='facile'?'si trova ovunque':p.rep==='media'?'vivai forniti':'online'}</span> <button class="linkbtn tiny" data-a="tplant" data-id="${p.id}">Scheda</button></div><div class="stepper"><button data-a="tcount" data-id="${p.id}" data-k="-1" aria-label="Togli ${esc(p.name)}">−</button><b>${n}</b><button data-a="tcount" data-id="${p.id}" data-k="1" aria-label="Aggiungi ${esc(p.name)}">+</button></div></div>`};
+ o+=`<section class="card" id="terrPiante"><div class="eyebrow">Passo 2</div><h2>Le piante</h2>`;
+ if(compact){
+  o+=`<p class="small muted">${chosen.reduce((a,[,n])=>a+n,0)} piante in questo terrario. Cambia le quantità con + e −.</p><div>${chosen.map(([id])=>pRow(TP[id])).join('')}</div><button class="btn soft" data-a="tcat" data-k="1">Aggiungi piante</button></section>`;
+ }else{
+  o+=`<p class="small muted">${avail.length} piante adatte al terrario ${t.closed?'chiuso':'aperto'}. Ne entrano bene circa ${Math.max(1,Math.round(plan.G.area(plan.S)*.75/(Math.PI*9)))} di taglia media.</p>
+ <div class="row wrap"><button class="btn primary" data-a="tsuggest">${chosen.length?'Proponi un’altra composizione':'Suggeriscimi le piante'}</button>${chosen.length?'<button class="btn sm" data-a="tclear">Svuota</button>':''}${isSaved&&chosen.length?'<button class="btn sm" data-a="tcat" data-k="0">Mostra solo le mie piante</button>':''}</div>
  ${chosen.length?`<div class="chips">${chosen.map(([id,n])=>`<button class="chip" data-a="tplant" data-id="${id}">${esc(TP[id].name)}${n>1?' ×'+n:''}</button>`).join('')}</div>`:''}
+ <div class="row"><input type="search" id="tsearch" data-c="tsearch" placeholder="Cerca per nome, es. fittonia" value="${esc(ui.tSearch||'')}" aria-label="Cerca una pianta per nome" autocomplete="off" enterkeyhint="search"></div>
  <div class="chips">${[['tutte','Tutte'],['alte','Alte'],['medie','Medie'],['basse','Basse'],['ricadenti','Ricadenti']].map(([k,l])=>`<button class="chip" data-a="tfilter" data-k="${k}" aria-pressed="${(ui.tFilter||'tutte')===k}">${l}</button>`).join('')}<button class="chip" data-a="teasy" aria-pressed="${!!ui.tEasy}">Facili da curare</button><button class="chip" data-a="trep" aria-pressed="${!!ui.tRep}">Facili da trovare</button></div>
- <div>${shown.map(p=>{const n=t.plants[p.id]||0;return`<div class="plantrow"><div class="pic">${plantPic(p)}</div><div class="t"><b>${esc(p.name)}</b><span class="tiny muted">${p.h} cm · ${ROLE_NAME[p.role]}</span><br><span class="pill ${p.diff==='facile'?'good':p.diff==='media'?'lemon':'bad'}" style="font-size:11px">cura ${p.diff}</span> <span class="pill neutral" style="font-size:11px">${p.rep==='facile'?'si trova ovunque':p.rep==='media'?'vivai forniti':'online'}</span> <button class="linkbtn tiny" data-a="tplant" data-id="${p.id}">Scheda</button></div><div class="stepper"><button data-a="tcount" data-id="${p.id}" data-k="-1" aria-label="Togli ${esc(p.name)}">−</button><b>${n}</b><button data-a="tcount" data-id="${p.id}" data-k="1" aria-label="Aggiungi ${esc(p.name)}">+</button></div></div>`}).join('')||'<p class="small muted">Nessuna pianta con questi filtri.</p>'}</div></section>`;
+ <div>${shown.map(pRow).join('')||`<p class="small muted">${tq?`Nessuna pianta “${esc(ui.tSearch.trim())}” ${(ui.tFilter&&ui.tFilter!=='tutte')||ui.tEasy||ui.tRep?'con questi filtri':'adatta al terrario '+(t.closed?'chiuso':'aperto')}.`:'Nessuna pianta con questi filtri.'}</p>`}</div></section>`;
+ }
  // strati
  o+=vLayers(t,plan);
  // decorazioni
@@ -1155,6 +1165,7 @@ function vTerr(){
  <label class="switch"><span><b>Collinetta al centro</b><br><span class="tiny muted">La terra più alta al centro dà profondità.</span></span><input type="checkbox" id="to_collina" data-c="topt" data-k="collina" ${t.collina?'checked':''}></label>
  ${[['legno','Legnetto'],['sassi','Sassi di fiume'],['ghiaietto','Sentiero di ghiaietto bianco']].map(([k,a])=>`<label class="switch"><span><b>${a}</b></span><input type="checkbox" id="tdec_${k}" data-c="tdec" data-k="${k}" ${t.decor[k]?'checked':''}></label>`).join('')}
  </section>`;
+ if(!plan.items.length){o+=`<section class="card"><h2>Ancora nessuna pianta</h2><p class="small muted">Scegli contenitore e piante: appena aggiungi la prima pianta qui compaiono la lista della spesa, le istruzioni passo passo e le cure.</p><button class="btn primary" data-a="gopiante">Vai alle piante</button></section>`;o+=`<section class="card"><div class="stack"><button class="btn primary block" data-a="tsave">Salva tra i miei terrari</button><button class="btn block" data-a="tnew">Nuovo progetto da zero</button></div></section>`;return o}
  // materiali: lista della spesa del progetto, sincronizzata in automatico con la scheda Spesa
  const sp=syncTerrSpesa(t,plan);const spLeft=sp.filter(x=>!x.done).length;
  o+=`<section class="card" id="terrSpesa"><div class="row spread"><div class="grow"><div class="eyebrow">Lista della spesa</div><h2>Cosa serve per questo terrario</h2></div><span class="pill ${spLeft?'lemon':'good'}">${spLeft?spLeft+' da comprare':'Tutto comprato'}</span></div>
@@ -1200,7 +1211,7 @@ function vLayers(t,plan){
  return o;}
 function vTerrMiei(){
  if(!S.terr.saved.length)return`<section class="card"><h2>Nessun terrario salvato</h2><p class="small muted">Progetta un terrario e premi “Salva tra i miei terrari”: lo ritrovi qui con disegno, materiali e istruzioni.</p><button class="btn primary" data-a="seg" data-n="terrSeg" data-k="progetta">Progetta</button></section>`;
- return`<div class="thumbs">${S.terr.saved.map(t=>{const p=terrPlan(t);const sp=syncTerrSpesa(t,p);const sl=sp.filter(x=>!x.done).length;return`<section class="card"><div class="scene">${drawTerr(t,p,{thumb:true})}</div><div><b>${esc(t.name)}</b><div class="tiny muted">${SHAPES[t.shape].name} · ${num(p.G.litri,1)} L · ${p.items.length} piante</div><div class="tiny" style="margin-top:4px">${t.started?`<span class="pill good">Montato ${fmtD(t.started)}</span> `:''}<span class="pill ${sl?'lemon':'good'}">Spesa ${sp.length-sl}/${sp.length}</span></div></div><div class="row wrap"><button class="btn sm soft" data-a="topen" data-id="${t.id}">Apri</button><button class="btn sm" data-a="tspesa" data-id="${t.id}">Spesa</button><button class="btn sm danger" data-a="tdel" data-id="${t.id}">Elimina</button></div></section>`}).join('')}</div>`;
+ return`<div class="thumbs">${S.terr.saved.map(t=>{const p=terrPlan(t);const sp=syncTerrSpesa(t,p);const sl=sp.filter(x=>!x.done).length;return`<section class="card"><div class="scene">${drawTerr(t,p,{thumb:true})}</div><div><b>${esc(t.name)}</b><div class="tiny muted">${SHAPES[t.shape].name} · ${num(p.G.litri,1)} L · ${p.items.length} piante</div><div class="tiny" style="margin-top:4px">${t.started?`<span class="pill good">Montato ${fmtD(t.started)}</span> `:''}${sp.length?`<span class="pill ${sl?'lemon':'good'}">Spesa ${sp.length-sl}/${sp.length}</span>`:'<span class="pill neutral">Senza piante</span>'}</div></div><div class="row wrap"><button class="btn sm soft" data-a="topen" data-id="${t.id}">Apri</button><button class="btn sm" data-a="tspesa" data-id="${t.id}">Spesa</button><button class="btn sm danger" data-a="tdel" data-id="${t.id}">Elimina</button></div></section>`}).join('')}</div>`;
 }
 
 /* ---------- ORTO ---------- */
@@ -1376,7 +1387,7 @@ function vSpesa(){
  if(L.length)o+=`<section class="card"><div class="stack"><button class="btn block" data-a="scopy">Copia tutte le liste (per WhatsApp o Note)</button><button class="btn block" data-a="sclean">Togli gli articoli comprati</button><button class="btn danger block" data-a="sclear">Svuota tutto</button></div></section>`;
  return o;
 }
-function syncTerrSpesa(t,plan){const src='terr:'+t.id,name='Terrario: '+t.name;const mats=(plan||terrPlan(t)).mats;const cur=S.spesa.filter(x=>x.src===src);
+function syncTerrSpesa(t,plan){const src='terr:'+t.id,name='Terrario: '+t.name;plan=plan||terrPlan(t);if(!plan.items.length){if(S.spesa.some(x=>x.src===src)){S.spesa=S.spesa.filter(x=>x.src!==src);save()}return[]}const mats=plan.mats;const cur=S.spesa.filter(x=>x.src===src);
  const sig=a=>a.map(m=>[m.g,m.t,m.q].join('|')).join('\n');
  if(sig(cur)!==sig(mats)||cur.some(x=>x.srcName!==name))addToSpesa(mats,src,name);
  return S.spesa.filter(x=>x.src===src)}
@@ -1410,6 +1421,9 @@ const A={
  tsuggest:()=>{ui.sugSeed=(ui.sugSeed||1)+7;const t=S.terr.draft;t.plants=suggestPlants(t,ui.sugSeed+hashStr(t.id));save();render();toast('Composizione proposta: puoi modificarla con + e −')},
  tclear:()=>{S.terr.draft.plants={};save();render()},
  tfilter:el=>{ui.tFilter=el.dataset.k;render()},
+ tcat:el=>{ui.tCatalog=el.dataset.k==='1';ui.tSearch='';render(false);const c=$('#terrPiante');if(c)c.scrollIntoView({block:'start'});if(ui.tCatalog){const i=$('#tsearch');if(i)i.focus({preventScroll:true})}},
+ tsearchx:()=>{ui.tSearch='';render();const i=$('#tsearch');if(i)i.focus({preventScroll:true})},
+ gopiante:()=>{const c=$('#terrPiante');if(c)c.scrollIntoView({behavior:'smooth',block:'start'})},
  teasy:()=>{ui.tEasy=!ui.tEasy;render()},
  shops:()=>openSheet('Dove comprare online',shopsBody),
  trep:()=>{ui.tRep=!ui.tRep;render()},
@@ -1429,8 +1443,8 @@ const A={
  tsave:()=>{const t=JSON.parse(JSON.stringify(S.terr.draft));const i=S.terr.saved.findIndex(x=>x.id===t.id);if(i>=0)S.terr.saved[i]=t;else S.terr.saved.push(t);save();render();toast('Terrario salvato')},
  tstart:()=>openSheet('Terrario montato',()=>`<p class="small">L’app crea i promemoria: controllo della condensa, rotazione settimanale, potature e controllo dell’acqua.</p><label class="f">Data di montaggio<input type="date" id="tsd" value="${todayISO()}"></label><button class="btn primary" data-a="tstartok">Crea il calendario</button>`),
  tstartok:()=>{const d=$('#tsd').value||todayISO();const t=S.terr.draft;t.started=d;const c=JSON.parse(JSON.stringify(t));const i=S.terr.saved.findIndex(x=>x.id===t.id);if(i>=0)S.terr.saved[i]=c;else S.terr.saved.push(c);S.tasks=S.tasks.filter(x=>x.src!=='t:'+t.id).concat(terrTasks(t,d));S.water['t:'+t.id]=d;S.example=false;save();closeSheet();render();toast('Calendario creato: lo trovi in Oggi')},
- tnew:()=>confirmSheet('Nuovo progetto','Il progetto attuale, se non l’hai salvato, verrà sostituito.','Inizia da zero',()=>{const od=S.terr.draft;if(!S.terr.saved.some(x=>x.id===od.id))S.spesa=S.spesa.filter(x=>x.src!=='terr:'+od.id);const t=defaultTerr();t.name='Nuovo terrario';t.plants={};t.decor={sassi:false,legno:false,ghiaietto:false};S.terr.draft=t;ui.terrView='risultato';save();render()}),
- topen:el=>{const t=S.terr.saved.find(x=>x.id===el.dataset.id);S.terr.draft=JSON.parse(JSON.stringify(t));ui.terrSeg='progetta';ui.terrView='risultato';save();render(false);window.scrollTo(0,0)},
+ tnew:()=>confirmSheet('Nuovo progetto','Il progetto attuale, se non l’hai salvato, verrà sostituito.','Inizia da zero',()=>{const od=S.terr.draft;if(!S.terr.saved.some(x=>x.id===od.id))S.spesa=S.spesa.filter(x=>x.src!=='terr:'+od.id);const t=defaultTerr();t.name='Nuovo terrario';t.plants={};t.decor={sassi:false,legno:false,ghiaietto:false};t.collina=false;S.terr.draft=t;ui.terrView='risultato';ui.tCatalog=false;ui.tSearch='';save();render()}),
+ topen:el=>{const t=S.terr.saved.find(x=>x.id===el.dataset.id);S.terr.draft=JSON.parse(JSON.stringify(t));ui.tCatalog=false;ui.tSearch='';ui.terrSeg='progetta';ui.terrView='risultato';save();render(false);window.scrollTo(0,0)},
  tdel:el=>confirmSheet('Eliminare il terrario?','Verranno tolti anche i suoi promemoria e la sua lista della spesa.','Elimina',()=>{const id=el.dataset.id;S.terr.saved=S.terr.saved.filter(x=>x.id!==id);if(S.terr.draft.id!==id)S.spesa=S.spesa.filter(x=>x.src!=='terr:'+id);S.tasks=S.tasks.filter(x=>x.src!=='t:'+id);save();render()}),
  // orto
  cedit:el=>{ui.edit=JSON.parse(JSON.stringify(S.orto.containers.find(c=>c.id===el.dataset.id)));openSheet('Modifica vaso',editSheet)},
@@ -1563,8 +1577,8 @@ const C={
 };
 
 document.addEventListener('click',e=>{const el=e.target.closest('[data-a]');if(!el)return;if(el.tagName==='SUMMARY')return;const f=A[el.dataset.a];if(f){e.preventDefault();f(el,e)}});
-document.addEventListener('change',e=>{const el=e.target.closest('[data-c]');if(!el||el.dataset.c==='search')return;const f=C[el.dataset.c];if(f)f(el)});
-let sT;document.addEventListener('input',e=>{const el=e.target;if(el.dataset&&el.dataset.c==='lcm'){const v=document.getElementById(el.id+'_v');if(v)v.textContent=num(parseFloat(el.value))+' cm'}if(el.dataset&&el.dataset.c==='search'){clearTimeout(sT);sT=setTimeout(()=>C.search(el),250)}});
+document.addEventListener('change',e=>{const el=e.target.closest('[data-c]');if(!el||el.dataset.c==='search'||el.dataset.c==='tsearch')return;const f=C[el.dataset.c];if(f)f(el)});
+let sT;document.addEventListener('input',e=>{const el=e.target;if(el.dataset&&el.dataset.c==='lcm'){const v=document.getElementById(el.id+'_v');if(v)v.textContent=num(parseFloat(el.value))+' cm'}if(el.dataset&&el.dataset.c==='search'){clearTimeout(sT);sT=setTimeout(()=>C.search(el),250)}if(el.dataset&&el.dataset.c==='tsearch'){clearTimeout(sT);sT=setTimeout(()=>{ui.tSearch=el.value;const pos=el.selectionStart;render();const n=$('#tsearch');if(n){n.focus({preventScroll:true});try{n.setSelectionRange(pos,pos)}catch(e){}}},200)}});
 document.addEventListener('click',e=>{const a=e.target.closest('#askclaude');if(!a)return;const txt=aiPrompt();try{navigator.clipboard.writeText(txt).then(()=>toast('Richiesta copiata: incollala in Claude e allega la foto'),()=>{})}catch(err){}});
 $('#overlay').addEventListener('click',e=>{if(e.target.id==='overlay')closeSheet()});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&ui.sheet)closeSheet()});

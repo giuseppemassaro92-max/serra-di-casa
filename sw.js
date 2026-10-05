@@ -1,11 +1,15 @@
-/* Serra di Casa — service worker: l'app funziona anche senza rete.
-   Cambia VERSION a ogni aggiornamento per forzare il nuovo contenuto. */
-const VERSION = 'serra-2026-10-05-ricerca-piante';
+/* Serra di Casa — service worker.
+   - La pagina si scarica sempre da GitHub quando c'è rete (così vedi subito gli aggiornamenti);
+     senza rete usa l'ultima copia salvata.
+   - Se manca un file, l'installazione non si blocca. */
+const VERSION = 'serra-2026-10-05.4';
 const CORE = ['./', './index.html', './manifest.webmanifest',
-  './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png'];
+  './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
 
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(VERSION).then(c => c.addAll(CORE)).then(() => self.skipWaiting()));
+  e.waitUntil(caches.open(VERSION)
+    .then(c => Promise.all(CORE.map(u => c.add(new Request(u, {cache: 'reload'})).catch(() => {}))))
+    .then(() => self.skipWaiting()));
 });
 self.addEventListener('activate', e => {
   e.waitUntil(caches.keys()
@@ -16,16 +20,15 @@ self.addEventListener('fetch', e => {
   const req = e.request;
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
-  // Meteo: sempre dalla rete (l'app ha già una sua cache di 3 ore)
-  if (url.hostname.includes('open-meteo.com')) return;
-  // Pagina: prima la rete (così vedi subito gli aggiornamenti), poi la copia salvata
-  if (req.mode === 'navigate') {
-    e.respondWith(fetch(req).then(r => {
-      const copy = r.clone(); caches.open(VERSION).then(c => c.put('./index.html', copy)); return r;
-    }).catch(() => caches.match('./index.html')));
+  if (url.hostname.includes('open-meteo.com')) return;          // meteo: sempre dalla rete
+  if (url.pathname.endsWith('version.json')) return;            // controllo aggiornamenti: mai dalla cache
+  if (req.mode === 'navigate' || url.pathname.endsWith('/') || url.pathname.endsWith('index.html')) {
+    e.respondWith(fetch(req, {cache: 'no-store'}).then(r => {
+      if (r.ok) { const copy = r.clone(); caches.open(VERSION).then(c => c.put('./index.html', copy)); }
+      return r;
+    }).catch(() => caches.match('./index.html').then(r => r || caches.match('./'))));
     return;
   }
-  // Resto (icone, font): prima la copia salvata, poi la rete
   e.respondWith(caches.match(req).then(hit => hit || fetch(req).then(r => {
     if (r.ok && (url.origin === location.origin || url.hostname.includes('fonts.g'))) {
       const copy = r.clone(); caches.open(VERSION).then(c => c.put(req, copy));

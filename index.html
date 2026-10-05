@@ -6,8 +6,8 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Serra di Casa">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&display=swap">
@@ -1584,7 +1584,23 @@ $('#overlay').addEventListener('click',e=>{if(e.target.id==='overlay')closeSheet
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&ui.sheet)closeSheet()});
 render(false);
 loadWeather();
-try{if('serviceWorker' in navigator&&location.protocol==='https:'&&!/claude\.(ai|site)|claudeusercontent/.test(location.hostname))navigator.serviceWorker.register('sw.js').catch(()=>{})}catch(e){}
+/* Aggiornamento automatico: all'apertura e ogni volta che torni nell'app controlla se su GitHub c'è una versione nuova */
+const APP_VERSION='2026-10-05.4';
+let swReg=null,reloading=false;
+async function checkUpdate(){
+ try{if(swReg)swReg.update().catch(()=>{})}catch(e){}
+ try{const r=await fetch('version.json?t='+Date.now(),{cache:'no-store'});if(!r.ok)return;const v=(await r.json()).v;
+  let tried=null;try{tried=sessionStorage.getItem(KEY+'-try')}catch(e){}
+  if(v&&v!==APP_VERSION&&!reloading&&tried!==v){reloading=true;try{sessionStorage.setItem(KEY+'-try',v);sessionStorage.setItem(KEY+'-upd',v)}catch(e){}location.reload()}}catch(e){}
+}
+try{if('serviceWorker' in navigator&&location.protocol==='https:'&&!/claude\.(ai|site)|claudeusercontent/.test(location.hostname)){
+ navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(r=>{swReg=r}).catch(()=>{});
+ navigator.serviceWorker.addEventListener('controllerchange',()=>{if(reloading)return;reloading=true;location.reload()});
+ checkUpdate();
+ document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')checkUpdate()});
+ window.addEventListener('pageshow',e=>{if(e.persisted)checkUpdate()});
+}}catch(e){}
+try{if(sessionStorage.getItem(KEY+'-upd')){sessionStorage.removeItem(KEY+'-upd');setTimeout(()=>toast('App aggiornata all’ultima versione'),400)}}catch(e){}
 </script>
 
 </body></html>

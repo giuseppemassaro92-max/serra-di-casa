@@ -2,7 +2,7 @@
    - La pagina si scarica sempre da GitHub quando c'è rete (così vedi subito gli aggiornamenti);
      senza rete usa l'ultima copia salvata.
    - Se manca un file, l'installazione non si blocca. */
-const VERSION = 'serra-2026-10-05.4';
+const VERSION = 'serra-2026-10-05.5';
 const CORE = ['./', './index.html', './manifest.webmanifest',
   './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
 

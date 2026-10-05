@@ -1,17 +1,13 @@
-<!doctype html>
-<html lang="it"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Serra di Casa</title>
+<meta name="theme-color" content="#2D6A47">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="Serra">
-<meta name="theme-color" content="#EDF1EA" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#0E1510" media="(prefers-color-scheme: dark)">
-<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
-<link rel="manifest" href="manifest.json">
-<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}</style>
-<title>Serra di Casa</title>
+<meta name="apple-mobile-web-app-title" content="Serra di Casa">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&display=swap">
@@ -194,8 +190,6 @@ a.btn.primary{color:var(--accent-ink)}
 @media (prefers-reduced-motion: reduce){.sheet{animation:none}*{transition:none!important}}
 @media (min-width:560px){.grid-wide2{display:grid;grid-template-columns:1fr 1fr;gap:14px}}
 </style>
-</head><body>
-
 
 <header class="top"><div class="top-in">
   <div class="grow"><div class="brand">Serra di Casa</div><h1 id="title">Oggi</h1></div>
@@ -1161,9 +1155,13 @@ function vTerr(){
  <label class="switch"><span><b>Collinetta al centro</b><br><span class="tiny muted">La terra più alta al centro dà profondità.</span></span><input type="checkbox" id="to_collina" data-c="topt" data-k="collina" ${t.collina?'checked':''}></label>
  ${[['legno','Legnetto'],['sassi','Sassi di fiume'],['ghiaietto','Sentiero di ghiaietto bianco']].map(([k,a])=>`<label class="switch"><span><b>${a}</b></span><input type="checkbox" id="tdec_${k}" data-c="tdec" data-k="${k}" ${t.decor[k]?'checked':''}></label>`).join('')}
  </section>`;
- // materiali
- o+=`<section class="card"><h2>Cosa serve per questo terrario</h2><p class="small muted">Quantità calcolate sulle misure del tuo vetro.</p>${['Terrario','Piante per terrario','Attrezzi'].map(g=>{const it=plan.mats.filter(m=>m.g===g);return it.length?`<div class="eyebrow">${g==='Terrario'?'Contenitore e strati':g}</div><div class="list">${it.map(m=>`<div class="li"><div class="t"><b>${esc(m.t)}</b><div class="tiny">${esc(m.q)}</div>${m.w?`<div class="tiny muted">Dove: ${esc(m.w)}</div>`:''}</div></div>`).join('')}</div>`:''}).join('')}
- <button class="btn primary" data-a="terr2spesa">Crea la lista della spesa di questo terrario</button></section>`;
+ // materiali: lista della spesa del progetto, sincronizzata in automatico con la scheda Spesa
+ const sp=syncTerrSpesa(t,plan);const spLeft=sp.filter(x=>!x.done).length;
+ o+=`<section class="card" id="terrSpesa"><div class="row spread"><div class="grow"><div class="eyebrow">Lista della spesa</div><h2>Cosa serve per questo terrario</h2></div><span class="pill ${spLeft?'lemon':'good'}">${spLeft?spLeft+' da comprare':'Tutto comprato'}</span></div>
+ <div class="progress" aria-hidden="true"><i style="width:${sp.length?((sp.length-spLeft)/sp.length*100).toFixed(0):0}%"></i></div>
+ <p class="tiny muted">Quantità calcolate sulle misure del tuo vetro. La lista si aggiorna da sola quando cambi contenitore, piante o strati, e la ritrovi uguale nella scheda Spesa: spunta qui o lì, le spunte restano.</p>
+ ${GROUPS.map(g=>{const gi=sp.filter(x=>x.g===g);return gi.length?`<div class="eyebrow">${g==='Terrario'?'Contenitore e strati':g}</div><div class="list">${gi.map(x=>`<div class="li ${x.done?'done':''}"><button class="check" role="checkbox" aria-checked="${!!x.done}" aria-label="Comprato: ${esc(x.t)}" data-a="scheck" data-id="${x.id}"></button><div class="t"><b>${esc(x.t)}</b>${x.q?`<div class="tiny">${esc(x.q)}</div>`:''}${x.w?`<div class="tiny muted">Dove: ${esc(x.w)}</div>`:''}</div></div>`).join('')}</div>`:''}).join('')}
+ <div class="grid2"><button class="btn soft" data-a="scopy" data-src="terr:${t.id}">Copia la lista</button><button class="btn" data-a="tab" data-k="spesa">Apri in Spesa</button></div></section>`;
  // istruzioni
  o+=`<section class="card"><h2>Istruzioni complete</h2><ol class="steps">${plan.steps.map((s,i)=>`<li><div><b>${esc(s.title)}</b><p class="small">${esc(s.text)}</p><button class="linkbtn tiny" data-a="gostage" data-k="${i}">Vedi il disegno di questo passo</button></div></li>`).join('')}</ol></section>`;
  // cura
@@ -1202,7 +1200,7 @@ function vLayers(t,plan){
  return o;}
 function vTerrMiei(){
  if(!S.terr.saved.length)return`<section class="card"><h2>Nessun terrario salvato</h2><p class="small muted">Progetta un terrario e premi “Salva tra i miei terrari”: lo ritrovi qui con disegno, materiali e istruzioni.</p><button class="btn primary" data-a="seg" data-n="terrSeg" data-k="progetta">Progetta</button></section>`;
- return`<div class="thumbs">${S.terr.saved.map(t=>{const p=terrPlan(t);return`<section class="card"><div class="scene">${drawTerr(t,p,{thumb:true})}</div><div><b>${esc(t.name)}</b><div class="tiny muted">${SHAPES[t.shape].name} · ${num(p.G.litri,1)} L · ${p.items.length} piante</div>${t.started?`<div class="tiny"><span class="pill good">Montato ${fmtD(t.started)}</span></div>`:''}</div><div class="row wrap"><button class="btn sm soft" data-a="topen" data-id="${t.id}">Apri</button><button class="btn sm" data-a="tspesa" data-id="${t.id}">Spesa</button><button class="btn sm danger" data-a="tdel" data-id="${t.id}">Elimina</button></div></section>`}).join('')}</div>`;
+ return`<div class="thumbs">${S.terr.saved.map(t=>{const p=terrPlan(t);const sp=syncTerrSpesa(t,p);const sl=sp.filter(x=>!x.done).length;return`<section class="card"><div class="scene">${drawTerr(t,p,{thumb:true})}</div><div><b>${esc(t.name)}</b><div class="tiny muted">${SHAPES[t.shape].name} · ${num(p.G.litri,1)} L · ${p.items.length} piante</div><div class="tiny" style="margin-top:4px">${t.started?`<span class="pill good">Montato ${fmtD(t.started)}</span> `:''}<span class="pill ${sl?'lemon':'good'}">Spesa ${sp.length-sl}/${sp.length}</span></div></div><div class="row wrap"><button class="btn sm soft" data-a="topen" data-id="${t.id}">Apri</button><button class="btn sm" data-a="tspesa" data-id="${t.id}">Spesa</button><button class="btn sm danger" data-a="tdel" data-id="${t.id}">Elimina</button></div></section>`}).join('')}</div>`;
 }
 
 /* ---------- ORTO ---------- */
@@ -1378,6 +1376,10 @@ function vSpesa(){
  if(L.length)o+=`<section class="card"><div class="stack"><button class="btn block" data-a="scopy">Copia tutte le liste (per WhatsApp o Note)</button><button class="btn block" data-a="sclean">Togli gli articoli comprati</button><button class="btn danger block" data-a="sclear">Svuota tutto</button></div></section>`;
  return o;
 }
+function syncTerrSpesa(t,plan){const src='terr:'+t.id,name='Terrario: '+t.name;const mats=(plan||terrPlan(t)).mats;const cur=S.spesa.filter(x=>x.src===src);
+ const sig=a=>a.map(m=>[m.g,m.t,m.q].join('|')).join('\n');
+ if(sig(cur)!==sig(mats)||cur.some(x=>x.srcName!==name))addToSpesa(mats,src,name);
+ return S.spesa.filter(x=>x.src===src)}
 function addToSpesa(items,src,srcName){const old=S.spesa.filter(x=>x.src===src);const keep=S.spesa.filter(x=>x.src!==src);const n=items.map(m=>{const prev=old.find(x=>x.t===m.t);return{id:uid(),g:m.g,t:m.t,q:m.q,w:m.w||whereFor(m),done:prev?prev.done:false,src,srcName}});S.spesa=[...keep,...n];save();return n.length}
 
 const VIEWS={oggi:vOggi,orto:vOrto,terrario:vTerr,piante:vPiante,spesa:vSpesa};
@@ -1427,9 +1429,9 @@ const A={
  tsave:()=>{const t=JSON.parse(JSON.stringify(S.terr.draft));const i=S.terr.saved.findIndex(x=>x.id===t.id);if(i>=0)S.terr.saved[i]=t;else S.terr.saved.push(t);save();render();toast('Terrario salvato')},
  tstart:()=>openSheet('Terrario montato',()=>`<p class="small">L’app crea i promemoria: controllo della condensa, rotazione settimanale, potature e controllo dell’acqua.</p><label class="f">Data di montaggio<input type="date" id="tsd" value="${todayISO()}"></label><button class="btn primary" data-a="tstartok">Crea il calendario</button>`),
  tstartok:()=>{const d=$('#tsd').value||todayISO();const t=S.terr.draft;t.started=d;const c=JSON.parse(JSON.stringify(t));const i=S.terr.saved.findIndex(x=>x.id===t.id);if(i>=0)S.terr.saved[i]=c;else S.terr.saved.push(c);S.tasks=S.tasks.filter(x=>x.src!=='t:'+t.id).concat(terrTasks(t,d));S.water['t:'+t.id]=d;S.example=false;save();closeSheet();render();toast('Calendario creato: lo trovi in Oggi')},
- tnew:()=>confirmSheet('Nuovo progetto','Il progetto attuale, se non l’hai salvato, verrà sostituito.','Inizia da zero',()=>{const t=defaultTerr();t.name='Nuovo terrario';t.plants={};t.decor={sassi:false,legno:false,ghiaietto:false};S.terr.draft=t;ui.terrView='risultato';save();render()}),
+ tnew:()=>confirmSheet('Nuovo progetto','Il progetto attuale, se non l’hai salvato, verrà sostituito.','Inizia da zero',()=>{const od=S.terr.draft;if(!S.terr.saved.some(x=>x.id===od.id))S.spesa=S.spesa.filter(x=>x.src!=='terr:'+od.id);const t=defaultTerr();t.name='Nuovo terrario';t.plants={};t.decor={sassi:false,legno:false,ghiaietto:false};S.terr.draft=t;ui.terrView='risultato';save();render()}),
  topen:el=>{const t=S.terr.saved.find(x=>x.id===el.dataset.id);S.terr.draft=JSON.parse(JSON.stringify(t));ui.terrSeg='progetta';ui.terrView='risultato';save();render(false);window.scrollTo(0,0)},
- tdel:el=>confirmSheet('Eliminare il terrario?','Verranno tolti anche i suoi promemoria.','Elimina',()=>{const id=el.dataset.id;S.terr.saved=S.terr.saved.filter(x=>x.id!==id);S.tasks=S.tasks.filter(x=>x.src!=='t:'+id);save();render()}),
+ tdel:el=>confirmSheet('Eliminare il terrario?','Verranno tolti anche i suoi promemoria e la sua lista della spesa.','Elimina',()=>{const id=el.dataset.id;S.terr.saved=S.terr.saved.filter(x=>x.id!==id);if(S.terr.draft.id!==id)S.spesa=S.spesa.filter(x=>x.src!=='terr:'+id);S.tasks=S.tasks.filter(x=>x.src!=='t:'+id);save();render()}),
  // orto
  cedit:el=>{ui.edit=JSON.parse(JSON.stringify(S.orto.containers.find(c=>c.id===el.dataset.id)));openSheet('Modifica vaso',editSheet)},
  cadd:()=>{ui.edit={id:'c'+uid(),name:'Nuovo vaso',type:'tondo',l:40,w:30,h:30,d:35,crops:[]};openSheet('Nuovo vaso',editSheet)},
@@ -1440,7 +1442,7 @@ const A={
  orto2spesa:()=>{const n=addToSpesa(ortoMats(S.orto.containers),'orto','Orto');render();toast(`Lista dell’orto pronta: ${n} articoli`)},
  ostart:()=>openSheet('Avvia il calendario',ostartBody),
  ostartok:()=>{const d=$('#osd').value||todayISO();let n=0;S.orto.containers.forEach(c=>{const lay=ortoLayout(c);lay.zones.forEach((z,i)=>{const cb=document.getElementById(`os_${c.id}_${i}`);if(!cb||!cb.checked)return;const pl={id:uid(),crop:z.cr.id,m:z.cz.m,cont:c.id,contName:c.name,date:d,count:z.pts.length};S.plantings.push(pl);S.tasks.push(...cropTasks(pl));n++})});S.water.orto=d;S.water.arom=d;S.example=false;save();closeSheet();ui.tab='oggi';ui.oggiSeg='oggi';render(false);window.scrollTo(0,0);toast(`${n} colture avviate: ecco le cose da fare`)},
- delplant:el=>confirmSheet('Togliere questa coltura?','Verranno tolti anche i suoi promemoria.','Togli',()=>{const id=el.dataset.id;S.plantings=S.plantings.filter(x=>x.id!==id);S.tasks=S.tasks.filter(x=>x.src!=='p:'+id);save();render()}),
+ delplant:el=>confirmSheet('Togliere questa coltura?','Verranno tolti anche i suoi promemoria e la sua lista della spesa.','Togli',()=>{const id=el.dataset.id;S.plantings=S.plantings.filter(x=>x.id!==id);S.tasks=S.tasks.filter(x=>x.src!=='p:'+id);save();render()}),
  crop:el=>openSheet(CROP[el.dataset.id].name,()=>cropSheet(el.dataset.id)),
  onlynow:()=>{ui.onlyNow=!ui.onlyNow;render()},
  guide:el=>{if(el.dataset.k==='negozi'){A.shops();return}if(el.dataset.k==='foto'){ui.ai={ctx:'orto',plant:'',note:'',img:null};openSheet('Diagnosi da foto',aiBody);return}const g=GUIDES[el.dataset.k];ui.diagK=ui.diagK||'orto';openSheet(g.t,()=>el.dataset.k==='diag'?diagBody():g.b)},
